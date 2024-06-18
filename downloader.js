@@ -177,10 +177,10 @@ function download(data, bin, progressData) {
         let result = await dl(url)
 
         if(result === 100) {
-            if(fs.existsSync(dl_audio_path) && format !== 'mp3') fs.rmSync(dl_audio_path, { force: true })
+            if(fs.existsSync(dl_audio_path) && format === 'mp3') await require('fs/promises').rename(dl_audio_path, dl_path)
+            
+            if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
             if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
-
-            if(fs.existsSync(dl_audio_path) && format === 'mp3') fs.renameSync(dl_audio_path, dl_path)
         }
 
         return resolve(result)
