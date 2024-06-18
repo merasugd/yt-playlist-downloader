@@ -24,7 +24,7 @@ function download(data, bin, progressData) {
 
     let dl_audio_path = path.join(bin, raw_title+".audio."+'mp3')
     let dl_video_path = path.join(bin, raw_title+".video."+'mp4')
-    let dl_path = path.join(bin, dl_title+"."+'mp4')
+    let dl_path = path.join(bin, dl_title+"."+format)
 
     let cookies = fs.readFileSync(path.join(__dirname, 'cookies.txt')).toString()
     let proxyServer = util.config['proxy_server'] || ''
@@ -177,8 +177,10 @@ function download(data, bin, progressData) {
         let result = await dl(url)
 
         if(result === 100) {
-            if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
+            if(fs.existsSync(dl_audio_path) && format !== 'mp3') fs.rmSync(dl_audio_path, { force: true })
             if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
+
+            if(fs.existsSync(dl_audio_path) && format === 'mp3') fs.renameSync(dl_audio_path, dl_path)
         }
 
         return resolve(result)
