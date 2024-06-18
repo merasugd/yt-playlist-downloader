@@ -13,7 +13,7 @@ A simple program to download YouTube playlists.
 
 ## Installation
 
-1. Download the repository and extract it
+1. Download the [repository](https://github.com/merasugd/yt-playlist-downloader/archive/refs/heads/main.zip) and extract it
 2. Install the required dependencies by running:
 ```bash
   npm install
