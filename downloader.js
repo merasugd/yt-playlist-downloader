@@ -3,7 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const colors = require('colors');
 const ffmpeg = require('ffmpeg-static')
-const HttpsProxyAgent = require('https-proxy-agent');
+const HttpsProxyAgent = require('https-proxy-agent')
+const ytSearch = require('yt-search')
 
 const cp = require('child_process')
 const request = require('request')
@@ -17,17 +18,19 @@ function download(playlistTitle, data, bin, progressData) {
     let url = data.url;
     let title = data.title
 
-    let format = data.format || 'mp4'
+    let format = (data.format || 'mp4')
     let quality = data.quality || 'highest'
 
     let dl_title = util.sanitizeTitle(title)
     let raw_title = dl_title.replaceAll(' ', '_').toLowerCase()
 
-    let dl_audio_path = path.join(bin, raw_title+".audio."+'mp3')
-    let dl_thumbnail_path = path.join(bin, raw_title+".thumbnail."+'jpg')
-    let dl_video_path = path.join(bin, raw_title+".video."+'mp4')
-    let dl_raw_path = path.join(bin, raw_title+".no_thumbnail."+format)
-    let dl_path = path.join(bin, dl_title+"."+format)
+    let dl_audio_path = path.join(bin, raw_title+".audio."+'webm')
+    let dl_thumbnail_path = path.join(bin, 'cover.jpg')
+    let dl_video_path = path.join(bin, raw_title+".video."+'webm')
+    let dl_raw_path = path.join(bin, raw_title+".no_thumbnail.mkv")
+    let dl_path = path.join(bin, dl_title+'.'+'mkv')
+
+    let final_dl_path = path.join(bin, dl_title+'.'+format)
 
     let cookies = fs.readFileSync(path.join(__dirname, 'cookies.txt')).toString()
     let proxyServer = util.config['proxy_server'] || ''
@@ -63,8 +66,6 @@ function download(playlistTitle, data, bin, progressData) {
                 let full = ytdl(uri, Object.assign(dlOptions, { quality: q || quality, filter: 'audioandvideo' }))
                 let fullStream = fs.createWriteStream(dl_path)
 
-                fs.writeFileSync('./uri.txt', uri)
-
                 await pipeStream(full, fullStream, "video and audio")
 
                 let r = await encode(uri, q, f)
@@ -94,11 +95,13 @@ function download(playlistTitle, data, bin, progressData) {
             prog.multipleProgress([
                 ("Downloading \""+dl_title+'"').yellow,
                 progressData,
-                { total: 100, current: Math.floor((current / total) * 100), label: 'encoding' }
+                { total: 100, current: Math.floor((current / total) * 100), label: 'thumbnail' }
             ])
 
+            let thumbnailUrl = (await ytSearch({ videoId: url.replaceAll('https://www.youtube.com/watch?v=', '') })).thumbnail
+
             let thumb = fs.createWriteStream(dl_thumbnail_path)
-            request(url).pipe(thumb)
+            request(thumbnailUrl).pipe(thumb)
 
             thumb.on('error', () => {
                 resolve('101')
@@ -117,7 +120,7 @@ function download(playlistTitle, data, bin, progressData) {
             
             src.on("progress", (_, downloaded, size) => {
                 const percent = ((downloaded / size) * 100).toFixed(2);
-                const total_progress = label === "video and audio" || label === "audio" ? 100 : total
+                const total_progress = label === "video and audio" || format === "mp3" ? 100 : total
     
                 current = last_current + Math.floor(parseInt(percent))
 
@@ -144,15 +147,15 @@ function download(playlistTitle, data, bin, progressData) {
     function encode(prev_uri, q, f) {
         function merge(video, audio) {
             return new Promise(async(resolve) => {
-                if(f && fs.existsSync(dl_path)) return resolve(100)
+                if(f && fs.existsSync(dl_path) || f && fs.existsSync(dl_raw_path)) return resolve(100)
 
-                if(q === 'lowest' && f && !fs.existsSync(dl_path)) {
+                if(q === 'lowest' && f && !fs.existsSync(dl_raw_path)) {
                     prog.log("Fsiled".red.bold)
                     return process.exit(1)
                 }
 
-                if(!q && f && !fs.existsSync(dl_path)) return resolve(await dl(prev_uri, 'lowest', true))
-                if(q && !f && !fs.existsSync(dl_path)) return resolve(await dl(prev_uri, undefined, true))
+                if(!q && f && !fs.existsSync(dl_raw_path)) return resolve(await dl(prev_uri, 'lowest', true))
+                if(q && !f && !fs.existsSync(dl_raw_path)) return resolve(await dl(prev_uri, undefined, true))
                 if(!fs.existsSync(audio) || !fs.existsSync(video)) return resolve(await dl(prev_uri, 'lowest'))
 
                 let audioStream = fs.createReadStream(audio)
@@ -175,13 +178,13 @@ function download(playlistTitle, data, bin, progressData) {
                 prog.multipleProgress([
                     ("Downloading \""+dl_title+'"').yellow,
                     progressData,
-                    { total: 100, current: Math.floor((current / total) * 100), label: 'encoding' }
+                    { total: 100, current: Math.floor((current / total) * 100), label: 'merging' }
                 ])
 
                 audioStream.pipe(proc.stdio[3])
                 videoStream.pipe(proc.stdio[4])
 
-                let output = fs.createWriteStream(dl_path)
+                let output = fs.createWriteStream(dl_raw_path)
                 proc.stdio[5].pipe(output)
 
                 output.on('error', (err) => {
@@ -200,11 +203,9 @@ function download(playlistTitle, data, bin, progressData) {
         function setThumbnail() {
             return new Promise(resolve => {
                 let proc = cp.spawn(ffmpeg, [
-                    '-loglevel', '8', '-hide_banner',
                     '-i', dl_raw_path,
                     '-attach', dl_thumbnail_path, '-metadata:s:t:0', 'mimetype=image/jpeg',
-                    '-c', 'copy',
-                    dl_path
+                    '-c', 'copy', dl_path
                 ], {
                     windowsHide: true
                 })
@@ -215,32 +216,27 @@ function download(playlistTitle, data, bin, progressData) {
                     { total: 100, current: Math.floor((current / total) * 100), label: 'metadata' }
                 ])
 
-                proc.stderr.on('data', async(d) => {
-                    if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
-
-                    await require('fs/promises').rename(dl_raw_path, dl_path)
-
-                    current = current + 1
+                proc.on('error', (err) => {
+                    prog.log(String(err).red)
+                    return resolve(101)
                 })
 
-                proc.on('error', async() => {
-                    if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
-                        
-                    await require('fs/promises').rename(dl_raw_path, dl_path)
-
-                    current = current + 1
-                })
-
-                proc.on('close', () => {
+                proc.on('close', async() => { 
                     current = current + 1
 
-                    resolve(100)
+                    prog.multipleProgress([
+                        ("Downloading \""+dl_title+'"').yellow,
+                        progressData,
+                        { total: 100, current: Math.floor((current / total) * 100), label: 'converting' }
+                    ])
+
+                    return resolve(await util.convertMp4(dl_path, final_dl_path))
                 })
             })
         }
 
         return new Promise(async(resolve) => {
-            resolve(await merge(dl_raw_path, dl_audio_path))
+            resolve(await merge(dl_video_path, dl_audio_path))
         })
     }
 
@@ -250,11 +246,14 @@ function download(playlistTitle, data, bin, progressData) {
         if(result === 100) {
             if(fs.existsSync(dl_audio_path) && format === 'mp3') {
                 await require('fs/promises').rename(dl_audio_path, dl_path)
-                await util.editSongMetadata(playlistTitle, url, dl_path, dl_thumbnail_path)
+                await util.editSongMetadata(playlistTitle, url, dl_path, final_dl_path, dl_thumbnail_path, progressData, dl_title)
             }
             
             if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
             if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
+            if(fs.existsSync(dl_thumbnail_path)) fs.rmSync(dl_thumbnail_path, { force: true })
+            if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
+            if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
         }
 
         return resolve(result)

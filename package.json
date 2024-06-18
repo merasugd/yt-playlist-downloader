@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node test.js",
-    "start": "node start.js"
+    "start": "node --no-deprecation start.js"
   },
   "author": "MerasGD",
   "license": "GPL-3.0-only",

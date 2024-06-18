@@ -3,6 +3,10 @@
 
 A simple program to download YouTube playlists.
 
+## Updates
+- Proper conversions
+- Metadata for mp3 and clean mp4
+
 ## Note
 - This program may be slow because it merges the audio and video downloads using `ffmpeg`.
 - The program splits downloads due to 'encoding errors,' videos without sound, or unplayable videos.
