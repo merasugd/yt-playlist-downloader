@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const metadata = require('ffmetadata')
 
 module.exports.sanitizeTitle = function (title) {
     return String(title).replaceAll(/[\\/:*"?|<>]/g, '');
