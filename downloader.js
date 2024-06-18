@@ -88,7 +88,7 @@ function download(data, bin, progressData) {
             
             src.on("progress", (_, downloaded, size) => {
                 const percent = ((downloaded / size) * 100).toFixed(2);
-                const total_progress = label === "video and video" ? 100 : total
+                const total_progress = label === "video and audio" || label === "audio" ? 100 : total
     
                 current = last_current + Math.floor(parseInt(percent))
 
