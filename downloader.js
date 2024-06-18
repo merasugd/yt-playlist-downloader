@@ -6,13 +6,14 @@ const ffmpeg = require('ffmpeg-static')
 const HttpsProxyAgent = require('https-proxy-agent');
 
 const cp = require('child_process')
+const request = require('request')
 
 const pather = path.join(__dirname, 'bin')
 
 const prog = require('./progress')
 const util = require('./util')
 
-function download(data, bin, progressData) {
+function download(playlistTitle, data, bin, progressData) {
     let url = data.url;
     let title = data.title
 
@@ -23,7 +24,9 @@ function download(data, bin, progressData) {
     let raw_title = dl_title.replaceAll(' ', '_').toLowerCase()
 
     let dl_audio_path = path.join(bin, raw_title+".audio."+'mp3')
+    let dl_thumbnail_path = path.join(bin, raw_title+".thumbnail."+'jpg')
     let dl_video_path = path.join(bin, raw_title+".video."+'mp4')
+    let dl_raw_path = path.join(bin, raw_title+".no_thumbnail."+format)
     let dl_path = path.join(bin, dl_title+"."+format)
 
     let cookies = fs.readFileSync(path.join(__dirname, 'cookies.txt')).toString()
@@ -40,9 +43,10 @@ function download(data, bin, progressData) {
         dlOptions = proxyServer !== '' && !proxyServer.startsWith(' ') && proxyServer.startsWith('http') ? Object.assign({ requestOptions: { agent: proxyAgent } }, dlOptions) : dlOptions
     }
 
-    let total = 201
+    let total = 203
     let current = 0
     let last_current = 0
+
 
     function dl(uri, q, f) {
         return new Promise(async(resolve) => {
@@ -51,6 +55,9 @@ function download(data, bin, progressData) {
                 ("Downloading \""+dl_title+'"').yellow,
                 progressData,
             ])
+
+            let thumb = await downloadThumbnail()
+            if(thumb !== 100) return resolve(thumb)
 
             if(f) {
                 let full = ytdl(uri, Object.assign(dlOptions, { quality: q || quality, filter: 'audioandvideo' }))
@@ -79,6 +86,28 @@ function download(data, bin, progressData) {
 
             let result = await encode(uri, q, f)
             return resolve(result)
+        })
+    }
+
+    function downloadThumbnail() {
+        return new Promise(async(resolve) => {
+            prog.multipleProgress([
+                ("Downloading \""+dl_title+'"').yellow,
+                progressData,
+                { total: 100, current: Math.floor((current / total) * 100), label: 'encoding' }
+            ])
+
+            let thumb = fs.createWriteStream(dl_thumbnail_path)
+            request(url).pipe(thumb)
+
+            thumb.on('error', () => {
+                resolve('101')
+            })
+
+            thumb.on('finish', () => {
+                current = current + 1
+                resolve(100)
+            })
         })
     }
 
@@ -160,16 +189,58 @@ function download(data, bin, progressData) {
                     return resolve(101)
                 })
 
-                output.on('finish', () => { 
+                output.on('finish', async() => { 
                     current = current + 1
 
-                    return resolve(100)
+                    return resolve(await setThumbnail())
+                })
+            })
+        }
+
+        function setThumbnail() {
+            return new Promise(resolve => {
+                let proc = cp.spawn(ffmpeg, [
+                    '-loglevel', '8', '-hide_banner',
+                    '-i', dl_raw_path,
+                    '-attach', dl_thumbnail_path, '-metadata:s:t:0', 'mimetype=image/jpeg',
+                    '-c', 'copy',
+                    dl_path
+                ], {
+                    windowsHide: true
+                })
+
+                prog.multipleProgress([
+                    ("Downloading \""+dl_title+'"').yellow,
+                    progressData,
+                    { total: 100, current: Math.floor((current / total) * 100), label: 'metadata' }
+                ])
+
+                proc.stderr.on('data', async(d) => {
+                    if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
+
+                    await require('fs/promises').rename(dl_raw_path, dl_path)
+
+                    current = current + 1
+                })
+
+                proc.on('error', async() => {
+                    if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
+                        
+                    await require('fs/promises').rename(dl_raw_path, dl_path)
+
+                    current = current + 1
+                })
+
+                proc.on('close', () => {
+                    current = current + 1
+
+                    resolve(100)
                 })
             })
         }
 
         return new Promise(async(resolve) => {
-            resolve(await merge(dl_video_path, dl_audio_path))
+            resolve(await merge(dl_raw_path, dl_audio_path))
         })
     }
 
@@ -177,7 +248,10 @@ function download(data, bin, progressData) {
         let result = await dl(url)
 
         if(result === 100) {
-            if(fs.existsSync(dl_audio_path) && format === 'mp3') await require('fs/promises').rename(dl_audio_path, dl_path)
+            if(fs.existsSync(dl_audio_path) && format === 'mp3') {
+                await require('fs/promises').rename(dl_audio_path, dl_path)
+                await util.editSongMetadata(playlistTitle, url, dl_path, dl_thumbnail_path)
+            }
             
             if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
             if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
@@ -201,7 +275,7 @@ function downloadLooper(arr, bin, pl, int) {
             { current, total, label: 'playlist' }
         ])
 
-        let dlResult = await download(item, bin, { current, total, label: 'playlist' })
+        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' })
 
         if(dlResult !== 100) return resolve(101)
 
