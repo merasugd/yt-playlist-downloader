@@ -25,12 +25,9 @@ function download(playlistTitle, data, bin, progressData) {
     let raw_title = dl_title.replaceAll(' ', '_').toLowerCase()
 
     let dl_audio_path = path.join(bin, raw_title+".audio."+'webm')
-    let dl_thumbnail_path = path.join(bin, 'cover.jpg')
     let dl_video_path = path.join(bin, raw_title+".video."+'webm')
-    let dl_raw_path = path.join(bin, raw_title+".no_thumbnail.mkv")
-    let dl_path = path.join(bin, dl_title+'.'+'mkv')
-
-    let final_dl_path = path.join(bin, dl_title+'.'+format)
+    let dl_raw_path = path.join(bin, raw_title+".mkv")
+    let dl_path = path.join(bin, dl_title+'.'+format)
 
     let cookies = fs.readFileSync(path.join(__dirname, 'cookies.txt')).toString()
     let proxyServer = util.config['proxy_server'] || ''
@@ -46,7 +43,7 @@ function download(playlistTitle, data, bin, progressData) {
         dlOptions = proxyServer !== '' && !proxyServer.startsWith(' ') && proxyServer.startsWith('http') ? Object.assign({ requestOptions: { agent: proxyAgent } }, dlOptions) : dlOptions
     }
 
-    let total = 203
+    let total = 201
     let current = 0
     let last_current = 0
 
@@ -58,9 +55,6 @@ function download(playlistTitle, data, bin, progressData) {
                 ("Downloading \""+dl_title+'"').yellow,
                 progressData,
             ])
-
-            let thumb = await downloadThumbnail()
-            if(thumb !== 100) return resolve(thumb)
 
             if(f) {
                 let full = ytdl(uri, Object.assign(dlOptions, { quality: q || quality, filter: 'audioandvideo' }))
@@ -87,30 +81,6 @@ function download(playlistTitle, data, bin, progressData) {
 
             let result = await encode(uri, q, f)
             return resolve(result)
-        })
-    }
-
-    function downloadThumbnail() {
-        return new Promise(async(resolve) => {
-            prog.multipleProgress([
-                ("Downloading \""+dl_title+'"').yellow,
-                progressData,
-                { total: 100, current: Math.floor((current / total) * 100), label: 'thumbnail' }
-            ])
-
-            let thumbnailUrl = (await ytSearch({ videoId: url.replaceAll('https://www.youtube.com/watch?v=', '') })).thumbnail
-
-            let thumb = fs.createWriteStream(dl_thumbnail_path)
-            request(thumbnailUrl).pipe(thumb)
-
-            thumb.on('error', () => {
-                resolve('101')
-            })
-
-            thumb.on('finish', () => {
-                current = current + 1
-                resolve(100)
-            })
         })
     }
 
@@ -195,42 +165,13 @@ function download(playlistTitle, data, bin, progressData) {
                 output.on('finish', async() => { 
                     current = current + 1
 
-                    return resolve(await setThumbnail())
-                })
-            })
-        }
-
-        function setThumbnail() {
-            return new Promise(resolve => {
-                let proc = cp.spawn(ffmpeg, [
-                    '-i', dl_raw_path,
-                    '-attach', dl_thumbnail_path, '-metadata:s:t:0', 'mimetype=image/jpeg',
-                    '-c', 'copy', dl_path
-                ], {
-                    windowsHide: true
-                })
-
-                prog.multipleProgress([
-                    ("Downloading \""+dl_title+'"').yellow,
-                    progressData,
-                    { total: 100, current: Math.floor((current / total) * 100), label: 'metadata' }
-                ])
-
-                proc.on('error', (err) => {
-                    prog.log(String(err).red)
-                    return resolve(101)
-                })
-
-                proc.on('close', async() => { 
-                    current = current + 1
-
                     prog.multipleProgress([
                         ("Downloading \""+dl_title+'"').yellow,
                         progressData,
                         { total: 100, current: Math.floor((current / total) * 100), label: 'converting' }
                     ])
 
-                    return resolve(await util.convertMp4(dl_path, final_dl_path))
+                    return resolve(await util.convertMp4(dl_raw_path, dl_path))
                 })
             })
         }
@@ -251,9 +192,7 @@ function download(playlistTitle, data, bin, progressData) {
             
             if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
             if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
-            if(fs.existsSync(dl_thumbnail_path)) fs.rmSync(dl_thumbnail_path, { force: true })
             if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
-            if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
         }
 
         return resolve(result)
