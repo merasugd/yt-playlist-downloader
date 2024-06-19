@@ -4,11 +4,19 @@
 A simple program to download YouTube playlists.
 
 ## Updates
+v1.0.1
 - Proper conversions
 - Metadata for mp3 and clean mp4
 
+v1.0.2
+- Managed files.
+- Metadata for mp4
+- ~~Video Thumbnails~~
+- Clean after merge and conversion
+- Proxy support for ytdl-core
+
 ## Note
-- This program may be slow because it merges the audio and video downloads using `ffmpeg`.
+- This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts videos to their specified format.
 - The program splits downloads due to 'encoding errors,' videos without sound, or unplayable videos.
 
 ## Requires

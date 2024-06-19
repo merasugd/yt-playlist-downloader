@@ -4,4 +4,4 @@
 ## choices for format are mp4 and mp3
 
 ## example format
-## PLwLSw1_eDZl2v3GdglUbai_QNMJHZMOHP:highest:mp4
+PLwLSw1_eDZl2v3GdglUbai_QNMJHZMOHP:highest:mp4

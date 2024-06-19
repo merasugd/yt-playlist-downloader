@@ -4,17 +4,15 @@ const path = require('path');
 const colors = require('colors');
 const ffmpeg = require('ffmpeg-static')
 const HttpsProxyAgent = require('https-proxy-agent')
-const ytSearch = require('yt-search')
 
 const cp = require('child_process')
-const request = require('request')
 
-const pather = path.join(__dirname, 'bin')
+const pather = path.join(__dirname, '..', 'bin')
 
 const prog = require('./progress')
 const util = require('./util')
 
-function download(playlistTitle, data, bin, progressData) {
+function download(playlistTitle, data, bin, progressData, index) {
     let url = data.url;
     let title = data.title
 
@@ -29,7 +27,9 @@ function download(playlistTitle, data, bin, progressData) {
     let dl_raw_path = path.join(bin, raw_title+".mkv")
     let dl_path = path.join(bin, dl_title+'.'+format)
 
-    let cookies = fs.readFileSync(path.join(__dirname, 'cookies.txt')).toString()
+    let nometadata = path.join(bin, dl_title+'.no_metadata.'+format)
+
+    let cookies = fs.readFileSync(path.join(__dirname, '..', 'cookies.txt')).toString()
     let proxyServer = util.config['proxy_server'] || ''
     let proxyAgent = proxyServer !== '' && !proxyServer.startsWith(' ') ? HttpsProxyAgent(proxyServer) : {}
     let ytIdentityToken = typeof util.config['youtube_identity_token'] === 'string' && util.config['youtube_identity_token'] !== '' && !util.config['youtube_identity_token'].startsWith(' ') ? util.config['youtube_identity_token'] : undefined
@@ -43,7 +43,7 @@ function download(playlistTitle, data, bin, progressData) {
         dlOptions = proxyServer !== '' && !proxyServer.startsWith(' ') && proxyServer.startsWith('http') ? Object.assign({ requestOptions: { agent: proxyAgent } }, dlOptions) : dlOptions
     }
 
-    let total = 201
+    let total = 203
     let current = 0
     let last_current = 0
 
@@ -90,7 +90,7 @@ function download(playlistTitle, data, bin, progressData) {
             
             src.on("progress", (_, downloaded, size) => {
                 const percent = ((downloaded / size) * 100).toFixed(2);
-                const total_progress = label === "video and audio" || format === "mp3" ? 100 : total
+                const total_progress = label === "video and audio" ? 100 : (format === 'mp3' ? 102 : total)
     
                 current = last_current + Math.floor(parseInt(percent))
 
@@ -165,13 +165,32 @@ function download(playlistTitle, data, bin, progressData) {
                 output.on('finish', async() => { 
                     current = current + 1
 
+                    if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
+                    if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
+
                     prog.multipleProgress([
                         ("Downloading \""+dl_title+'"').yellow,
                         progressData,
                         { total: 100, current: Math.floor((current / total) * 100), label: 'converting' }
                     ])
 
-                    return resolve(await util.convertMp4(dl_raw_path, dl_path))
+                    await util.convertMp4(dl_raw_path, dl_path)
+
+                    if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
+
+                    current = current + 1
+
+                    prog.multipleProgress([
+                        ("Downloading \""+dl_title+'"').yellow,
+                        progressData,
+                        { total: 100, current: Math.floor((current / total) * 100), label: 'metadata' }
+                    ])
+
+                    await util.editVideoMetadata(playlistTitle, url, dl_path, nometadata)
+
+                    current = current + 1
+
+                    return resolve(100)
                 })
             })
         }
@@ -186,13 +205,13 @@ function download(playlistTitle, data, bin, progressData) {
 
         if(result === 100) {
             if(fs.existsSync(dl_audio_path) && format === 'mp3') {
-                await require('fs/promises').rename(dl_audio_path, dl_path)
-                await util.editSongMetadata(playlistTitle, url, dl_path, final_dl_path, dl_thumbnail_path, progressData, dl_title)
+                await require('fs/promises').rename(dl_audio_path, dl_raw_path)
+                await util.editSongMetadata(playlistTitle, url, dl_raw_path, dl_path, progressData, dl_title)
             }
             
+            if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
             if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
             if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
-            if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
         }
 
         return resolve(result)
@@ -213,7 +232,7 @@ function downloadLooper(arr, bin, pl, int) {
             { current, total, label: 'playlist' }
         ])
 
-        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' })
+        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' }, int)
 
         if(dlResult !== 100) return resolve(101)
 
