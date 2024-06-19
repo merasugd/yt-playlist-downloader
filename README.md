@@ -20,6 +20,12 @@ v1.0.2
 - Clean after merge and conversion
 - Proxy support for ytdl-core
 
+## Pre-Releases
+v1.0.3-pre
+- Removed **Split Download and Merging**
+- Converting remains
+- Video thumbnails is now more stable (since better mp4)
+
 ## Note
 - This program may be slow because it converts and edits the metadata of downloads using `ffmpeg`S
 - The case listed from  here is only for v1.0.2 below
