@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.3**
+**v1.0.3-pre**
 
 older versions can be downloaded thru releases
 
