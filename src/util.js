@@ -65,10 +65,12 @@ module.exports.editSongMetadata = function(playlistTitle, url, raw_path, final_p
         prog.multipleProgress([
             ("Downloading \""+song_title+'"').yellow,
             progressData,
-            { total: 100, current: 98, label: 'converting' }
+            { total: 100, current: 98, label: 'converting to mp3' }
         ])
 
         await module.exports.convertMp3(raw_path, final_path)
+
+        if(fs.existsSync(raw_path)) fs.rmSync(raw_path, { force: true })
 
         prog.multipleProgress([
             ("Downloading \""+song_title+'"').yellow,
@@ -113,6 +115,7 @@ module.exports.editVideoMetadata = function(playlistTitle, url, video_path, nome
             '-metadata', `title="${data.title}"`,
             '-metadata', `artist="${data.author.name}"`,
             '-metadata', `year=${data.uploadDate.split('-')[0]}`,
+            '-metadata', `date=${data.uploadDate.split('-')[0]}`,
             '-metadata', `genre="${data.genre}"`,
             '-metadata', `album="${playlistTitle}"`,
             '-metadata', `description="${data.description}"`,

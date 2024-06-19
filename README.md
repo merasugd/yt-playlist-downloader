@@ -3,6 +3,11 @@
 
 A simple program to download YouTube playlists.
 
+## Current Version
+**v1.0.3**
+
+older versions can be downloaded thru releases
+
 ## Updates
 v1.0.1
 - Proper conversions
@@ -16,8 +21,10 @@ v1.0.2
 - Proxy support for ytdl-core
 
 ## Note
-- This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts videos to their specified format.
-- The program splits downloads due to 'encoding errors,' videos without sound, or unplayable videos.
+- This program may be slow because it converts and edits the metadata of downloads using `ffmpeg`S
+- The case listed from  here is only for v1.0.2 below
+- ~~This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts videos to their specified format.~~
+- ~~The program splits downloads due to 'encoding errors,' videos without sound, or unplayable videos.~~
 
 ## Requires
 - FFmpeg
@@ -42,7 +49,7 @@ v1.0.2
 - **YouTube Cookies**: Can use YouTube cookies stored in `cookies.txt` for downloading restricted content.
 - **Simple Download**: Easy to use for downloading YouTube content.
 - **Compression**: Option to compress downloads into a zip file or move them to a directory.
-- **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.
+- ~~Split Download and Merging: Downloads audio and video separately and merges them into a single file using `ffmpeg`.~~
 
 
 ## Support
