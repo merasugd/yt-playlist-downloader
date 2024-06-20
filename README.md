@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.3-pre**
+**v1.0.3-pre2**
 
 older versions can be downloaded thru releases
 
@@ -26,11 +26,12 @@ v1.0.3-pre
 - Converting remains
 - Video thumbnails is now more stable (since better mp4)
 
+v1.0.3-pre2
+- Brings back **Split Download and Merging** as an option in the config (defaults to false)
+
 ## Note
-- This program may be slow because it converts and edits the metadata of downloads using `ffmpeg`S
-- The case listed from  here is only for v1.0.2 below
-- ~~This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts videos to their specified format.~~
-- ~~The program splits downloads due to 'encoding errors,' videos without sound, or unplayable videos.~~
+- This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
+- The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because one-download quality is sh#t.
 
 ## Requires
 - FFmpeg
@@ -55,7 +56,7 @@ v1.0.3-pre
 - **YouTube Cookies**: Can use YouTube cookies stored in `cookies.txt` for downloading restricted content.
 - **Simple Download**: Easy to use for downloading YouTube content.
 - **Compression**: Option to compress downloads into a zip file or move them to a directory.
-- ~~Split Download and Merging: Downloads audio and video separately and merges them into a single file using `ffmpeg`.~~
+- **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.
 
 
 ## Support

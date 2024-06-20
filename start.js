@@ -7,10 +7,13 @@ const prompter = readline.createInterface({
     output: process.stdout
 })
 
+const util = require('./src/util')
+
 const prog = require('./src/progress')
 const searching = require('./src/searching')
-const downloader = require('./src/downloader')
 const compressor = require('./src/compressor')
+
+const downloader = util.config['split_download'] ? require('./src/split-downloader') : require('./src/downloader')
 
 if(!fs.existsSync(path.join(__dirname, "playlists.txt"))) fs.writeFileSync(path.join(__dirname, "playlists.txt"), `## this is used so you can download multiple playlist
 ## format to use is "(playlist_id):(quality):(format)"

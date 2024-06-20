@@ -100,10 +100,6 @@ module.exports.editSongMetadata = function(playlistTitle, url, raw_path, final_p
     })
 }
 
-module.exports.basicDownload = function(url, path) {
-
-}
-
 module.exports.editVideoMetadata = function(playlistTitle, url, video_path, nometadata) {
     return new Promise(async(resolve) => {
         let data = await search({ videoId: url.replaceAll('https://www.youtube.com/watch?v=', '') })

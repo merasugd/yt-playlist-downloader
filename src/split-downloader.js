@@ -2,19 +2,17 @@ const ytdl = require('ytdl-core');
 const fs = require('fs');
 const path = require('path');
 const colors = require('colors');
+const ffmpeg = require('ffmpeg-static')
 const HttpsProxyAgent = require('https-proxy-agent')
 
-//unused since v1.0.3
-
-/*const ffmpeg = require('ffmpeg-static')
-const cp = require('child_process')*/
+const cp = require('child_process')
 
 const pather = path.join(__dirname, '..', 'bin')
 
 const prog = require('./progress')
 const util = require('./util')
 
-function download(playlistTitle, data, bin, progressData) {
+function download(playlistTitle, data, bin, progressData, index) {
     let url = data.url;
     let title = data.title
 
@@ -25,9 +23,8 @@ function download(playlistTitle, data, bin, progressData) {
     let raw_title = dl_title.replaceAll(' ', '_').toLowerCase()
 
     let dl_audio_path = path.join(bin, raw_title+".audio."+'webm')
-    // unused since 1.0.3
-    /*let dl_video_path = path.join(bin, raw_title+".video."+'webm')*/
-    let dl_raw_path = path.join(bin, raw_title+".webm")
+    let dl_video_path = path.join(bin, raw_title+".video."+'webm')
+    let dl_raw_path = path.join(bin, raw_title+".mkv")
     let dl_path = path.join(bin, dl_title+'.'+format)
 
     let nometadata = path.join(bin, dl_title+'.no_metadata.'+format)
@@ -51,7 +48,7 @@ function download(playlistTitle, data, bin, progressData) {
     let last_current = 0
 
 
-    function dl(uri, q) {
+    function dl(uri, q, f) {
         return new Promise(async(resolve) => {
 
             prog.multipleProgress([
@@ -60,81 +57,41 @@ function download(playlistTitle, data, bin, progressData) {
                 { total: 100, current: 0, label: 'waiting' }
             ])
 
-            if(format === 'mp4') {
-                let full = ytdl(uri, Object.assign(dlOptions, { quality: q || quality, filter: 'videoandaudio' }))
-                let fullStream = fs.createWriteStream(dl_raw_path)
+            if(f) {
+                let full = ytdl(uri, Object.assign(dlOptions, { quality: q || quality, filter: 'audioandvideo' }))
+                let fullStream = fs.createWriteStream(dl_path)
 
-                await pipeStream(full, fullStream, "downloading")
+                await pipeStream(full, fullStream, "video and audio")
 
-                //unused since v1.0.3
-                //let r = await encode(uri, q, f)
-
-                prog.multipleProgress([
-                    ("Downloading \""+dl_title+'"').yellow,
-                    progressData,
-                    { total: 100, current: Math.floor((current / 102) * 100), label: "converting to mp4" }
-                ])
-
-                let r1 = await util.convertMp4(dl_raw_path, dl_path)
-                if(r1 !== 100) return resolve(r1)
-                if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path)
-                current = current + 1
-
-                prog.multipleProgress([
-                    ("Downloading \""+dl_title+'"').yellow,
-                    progressData,
-                    { total: 100, current: Math.floor((current / 102) * 100), label: "converting to mp4" }
-                ])
-                prog.multipleProgress([
-                    ("Downloading \""+dl_title+'"').yellow,
-                    progressData,
-                    { total: 100, current: Math.floor((current / 102) * 100), label: "metadata" }
-                ])
-
-                let r = await util.editVideoMetadata(playlistTitle, url, dl_path, nometadata)
-                current = current + 1
-
-                prog.multipleProgress([
-                    ("Downloading \""+dl_title+'"').yellow,
-                    progressData,
-                    { total: 100, current: Math.floor((current / 102) * 100), label: "metadata" }
-                ])
+                let r = await encode(uri, q, f)
 
                 return resolve(r)
             }
 
             let audio = ytdl(uri, Object.assign(dlOptions, { quality: (q || quality)+'audio', filter: 'audioonly' }))
-            let audioStream = fs.createWriteStream(dl_raw_path)
-            await pipeStream(audio, audioStream, "downloading")
+            let audioStream = fs.createWriteStream(dl_audio_path)
 
-            let result = await util.editSongMetadata(playlistTitle, url, dl_raw_path, dl_path, progressData, dl_title)
+            await pipeStream(audio, audioStream, "audio")
 
-            return resolve(result)
+            if(format === 'mp3') return resolve(100)
 
-            // unused since v1.0.3
-            /*let video = ytdl(uri, Object.assign(dlOptions, { quality: (q || quality)+'video', filter: 'videoonly' }))
+            let video = ytdl(uri, Object.assign(dlOptions, { quality: (q || quality)+'video', filter: 'videoonly' }))
             let videoStream = fs.createWriteStream(dl_video_path)
 
             await pipeStream(video, videoStream, "video")
 
             let result = await encode(uri, q, f)
-            return resolve(result)*/
+            return resolve(result)
         })
     }
 
     function pipeStream(src, dest, label) {
         return new Promise((resolve) => {
-            prog.multipleProgress([
-                ("Downloading \""+dl_title+'"').yellow,
-                progressData,
-                { total: 100, current: 0, label: 'waiting' }
-            ])
-
             src.pipe(dest)
             
             src.on("progress", (_, downloaded, size) => {
                 const percent = ((downloaded / size) * 100).toFixed(2);
-                const total_progress = label === "video and audio"  || label === "downloading" ? 102 : (format === 'mp3' ? 102 : total)
+                const total_progress = label === "video and audio" ? 100 : (format === 'mp3' ? 102 : total)
     
                 current = last_current + Math.floor(parseInt(percent))
 
@@ -158,8 +115,7 @@ function download(playlistTitle, data, bin, progressData) {
         })
     }
 
-    // unused since v1.0.3
-    /*function encode(prev_uri, q, f) {
+    function encode(prev_uri, q, f) {
         function merge(video, audio) {
             return new Promise(async(resolve) => {
                 if(f && fs.existsSync(dl_path) || f && fs.existsSync(dl_raw_path)) return resolve(100)
@@ -243,16 +199,20 @@ function download(playlistTitle, data, bin, progressData) {
         return new Promise(async(resolve) => {
             resolve(await merge(dl_video_path, dl_audio_path))
         })
-    }*/
+    }
 
     return new Promise(async(resolve) => {
         let result = await dl(url)
 
         if(result === 100) {
-            //unused since 1.0.3
-            /*if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
+            if(fs.existsSync(dl_audio_path) && format === 'mp3') {
+                await require('fs/promises').rename(dl_audio_path, dl_raw_path)
+                await util.editSongMetadata(playlistTitle, url, dl_raw_path, dl_path, progressData, dl_title)
+            }
+            
+            if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
             if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
-            if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })*/
+            if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
         }
 
         return resolve(result)
@@ -274,7 +234,7 @@ function downloadLooper(arr, bin, pl, int) {
             { total: 100, current: 0, label: 'waiting' }
         ])
 
-        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' })
+        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' }, int)
 
         if(dlResult !== 100) return resolve(101)
 
