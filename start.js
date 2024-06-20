@@ -15,7 +15,8 @@ const compressor = require('./src/compressor')
 
 const downloader = util.config['split_download'] ? require('./src/split-downloader') : require('./src/downloader')
 
-if(!fs.existsSync(path.join(__dirname, "playlists.txt"))) fs.writeFileSync(path.join(__dirname, "playlists.txt"), `## this is used so you can download multiple playlist
+//unused since final 1.0.3 release
+/*if(!fs.existsSync(path.join(__dirname, "playlists.txt"))) fs.writeFileSync(path.join(__dirname, "playlists.txt"), `## this is used so you can download multiple playlist
 ## format to use is "(playlist_id):(quality):(format)"
 ## choices for quality are highest and lowest (ytdl-core doesnt have medium)
 ## choices for format are mp4 and mp3
@@ -23,10 +24,18 @@ if(!fs.existsSync(path.join(__dirname, "playlists.txt"))) fs.writeFileSync(path.
 ## example format
 ## PLwLSw1_eDZl2v3GdglUbai_QNMJHZMOHP:highest:mp4
 `)
-if(!fs.existsSync(path.join(__dirname, "cookies.txt"))) fs.writeFileSync(path.join(__dirname, "cookies.txt"), '')
+if(!fs.existsSync(path.join(__dirname, "cookies.txt"))) fs.writeFileSync(path.join(__dirname, "cookies.txt"), '')*/
+
 if(!fs.existsSync(path.join(__dirname, 'bin'))) fs.mkdirSync(path.join(__dirname, 'bin'))
 
-let listofplaylist = fs.readFileSync(path.join(__dirname, "playlists.txt")).toString().split("\n").filter(v => v && !v.startsWith('\r') && !v.startsWith(' ') && !v.startsWith("##") && v !== "")
+let listofplaylist = (util.config['playlists'] || []).map(v => {
+    if(typeof v !== 'object') return 'not-valid'
+
+    if(!v.playlistId || !v.quality || !v.format)  return 'not-valid'
+    if(typeof v.playlistId !== 'string' || typeof v.quality !== 'string' || typeof v.format !== 'string')  return 'not-valid'
+    
+    return v.playlistId+':'+v.quality+':'+v.format
+}).filter(v => v !== 'not-valid')
 
 start()
 
@@ -40,14 +49,8 @@ function prompt(plId, q, f, t) {
     return new Promise(async(resolve) => {
         prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green)
 
-        let inner = String(t || await prompter.question("Use playlists.txt: (y/N) ")).toLowerCase()
+        let inner = String(t || await prompter.question("Multiple Playlist: (y/N) ")).toLowerCase()
         if(inner === "y" || inner === 'yes') {
-            let sure = String(await prompter.question("Are you sure: (y/N) ")).toLowerCase()
-
-            if(sure === "n" || sure === "no") {
-                return resolve(await prompt())
-            }
-
             let in_outputdir = path.resolve(String(await prompter.question("Output Dir: ")).replaceAll('"', ''))
             if(in_outputdir === "" || in_outputdir.startsWith(" ") || in_outputdir.startsWith('"') || in_outputdir.endsWith('"') || !fs.existsSync(in_outputdir) || !(fs.statSync(in_outputdir).isDirectory())) return resolve(await prompt(plId, q, f, t, inner))
 
@@ -121,13 +124,13 @@ function main(inner, id, quality, format, outputdir, move) {
                 prog.log("Empty playlists.txt".red.bold)
                 return process.exit(1)
             } else if(result === 102) {
-                prog.log("Found an invalid format use... please read the comments in the file".red.bold)
+                prog.log("Found an invalid format use...".red.bold)
                 return process.exit(1)
             } else if(result === 103) {
-                prog.log("Found an invalid quality... please read the comments in the file".red.bold)
+                prog.log("Found an invalid quality...".red.bold)
                 return process.exit(1)
             } else if(result === 104) {
-                prog.log("Found an invalid format... please read the comments in the file".red.bold)
+                prog.log("Found an invalid format...".red.bold)
                 return process.exit(1)
             }
 
@@ -141,7 +144,7 @@ function main(inner, id, quality, format, outputdir, move) {
     
         let dl_result = await downloader(playlist_videos, playlist_title)
 
-        let compress_result = await compressor(dl_result, move, outputdir)
+        await compressor(dl_result, move, outputdir)
 
         return resolve(100)
     })

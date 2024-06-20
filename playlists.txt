@@ -1,7 +1,0 @@
-## this is used so you can download multiple playlist
-## format to use is "(playlist_id):(quality):(format)"
-## choices for quality are highest and lowest (ytdl-core doesnt have medium)
-## choices for format are mp4 and mp3
-
-## example format
-PLqkwNLhKQzB9jqCtp2keXjeIOUCfyMtbZ:highest:mp3

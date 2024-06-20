@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.3-pre2**
+**v1.0.3**
 
 older versions can be downloaded thru releases
 
@@ -19,6 +19,11 @@ v1.0.2
 - ~~Video Thumbnails~~
 - Clean after merge and conversion
 - Proxy support for ytdl-core
+
+v1.0.3
+- made `playlists.txt` and `cookies.txt` in a one `settings.json`
+- moved proxy server setting and youtube identity token setting to `settings.json`
+- Cleaned some dirty code
 
 ## Pre-Releases
 v1.0.3-pre
@@ -52,8 +57,8 @@ v1.0.3-pre2
 ## Features
 
 - **Audio Only Download**: Option to download only the audio from YouTube videos.
-- **Multiple Playlists**: Supports downloading multiple playlists listed in `playlists.txt`.
-- **YouTube Cookies**: Can use YouTube cookies stored in `cookies.txt` for downloading restricted content.
+- **Multiple Playlists**: Supports downloading multiple playlists listed in `settings.jsom`.
+- **YouTube Cookies**: Can use YouTube cookies stored in `settings.json` for downloading restricted content.
 - **Simple Download**: Easy to use for downloading YouTube content.
 - **Compression**: Option to compress downloads into a zip file or move them to a directory.
 - **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.

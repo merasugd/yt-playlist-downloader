@@ -12,7 +12,7 @@ const pather = path.join(__dirname, '..', 'bin')
 const prog = require('./progress')
 const util = require('./util')
 
-function download(playlistTitle, data, bin, progressData, index) {
+function download(playlistTitle, data, bin, progressData) {
     let url = data.url;
     let title = data.title
 
@@ -29,13 +29,13 @@ function download(playlistTitle, data, bin, progressData, index) {
 
     let nometadata = path.join(bin, dl_title+'.no_metadata.'+format)
 
-    let cookies = fs.readFileSync(path.join(__dirname, '..', 'cookies.txt')).toString()
-    let proxyServer = util.config['proxy_server'] || ''
-    let proxyAgent = proxyServer !== '' && !proxyServer.startsWith(' ') ? HttpsProxyAgent(proxyServer) : {}
-    let ytIdentityToken = typeof util.config['youtube_identity_token'] === 'string' && util.config['youtube_identity_token'] !== '' && !util.config['youtube_identity_token'].startsWith(' ') ? util.config['youtube_identity_token'] : undefined
+    let cookies = util.settings['cookie'] || ''
+    let proxyServer = util.settings['proxy_server'] || ''
+    let proxyAgent = proxyServer !== '' && !proxyServer.startsWith(' ') ? HttpsProxyAgent(proxyServer) : undefined
+    let ytIdentityToken = typeof util.settings['youtube_identity_token'] === 'string' && util.settings['youtube_identity_token'] !== '' && !util.settings['youtube_identity_token'].startsWith(' ') ? util.settings['youtube_identity_token'] : undefined
 
     let dlOptions = {}
-
+s
     if(util.config['use_youtube_cookies']) {
         dlOptions = cookies !== '' && !cookies.startsWith(' ') ? Object.assign({ requestOptions: { headers: { cookie: cookies, 'x-youtube-identity-token': ytIdentityToken } } }, dlOptions) : dlOptions
     }
@@ -234,7 +234,7 @@ function downloadLooper(arr, bin, pl, int) {
             { total: 100, current: 0, label: 'waiting' }
         ])
 
-        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' }, int)
+        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' })
 
         if(dlResult !== 100) return resolve(101)
 

@@ -5,8 +5,6 @@ const metadata = require('ffmetadata')
 const search = require('yt-search')
 const ffmpeg = require('ffmpeg-static')
 const cp = require('child_process')
-const request = require('request')
-
 const prog = require('./progress')
 
 metadata.setFfmpegPath(ffmpeg)
@@ -16,6 +14,7 @@ module.exports.sanitizeTitle = function (title) {
 }
 
 module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config.json'), { encoding: 'utf-8' }))
+module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings.json'), { encoding: 'utf-8' }))
 
 module.exports.convertMp4 = function(inp, out) {
     return new Promise(async(resolve) => {

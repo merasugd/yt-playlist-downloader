@@ -24,18 +24,18 @@ function download(playlistTitle, data, bin, progressData) {
     let dl_title = util.sanitizeTitle(title)
     let raw_title = dl_title.replaceAll(' ', '_').toLowerCase()
 
-    let dl_audio_path = path.join(bin, raw_title+".audio."+'webm')
     // unused since 1.0.3
-    /*let dl_video_path = path.join(bin, raw_title+".video."+'webm')*/
+    /*let dl_audio_path = path.join(bin, raw_title+".audio."+'webm')
+    let dl_video_path = path.join(bin, raw_title+".video."+'webm')*/
     let dl_raw_path = path.join(bin, raw_title+".webm")
     let dl_path = path.join(bin, dl_title+'.'+format)
 
     let nometadata = path.join(bin, dl_title+'.no_metadata.'+format)
 
-    let cookies = fs.readFileSync(path.join(__dirname, '..', 'cookies.txt')).toString()
-    let proxyServer = util.config['proxy_server'] || ''
-    let proxyAgent = proxyServer !== '' && !proxyServer.startsWith(' ') ? HttpsProxyAgent(proxyServer) : {}
-    let ytIdentityToken = typeof util.config['youtube_identity_token'] === 'string' && util.config['youtube_identity_token'] !== '' && !util.config['youtube_identity_token'].startsWith(' ') ? util.config['youtube_identity_token'] : undefined
+    let cookies = util.settings['cookie'] || ''
+    let proxyServer = util.settings['proxy_server'] || ''
+    let proxyAgent = proxyServer !== '' && !proxyServer.startsWith(' ') ? HttpsProxyAgent(proxyServer) : undefined
+    let ytIdentityToken = typeof util.settings['youtube_identity_token'] === 'string' && util.settings['youtube_identity_token'] !== '' && !util.settings['youtube_identity_token'].startsWith(' ') ? util.settings['youtube_identity_token'] : undefined
 
     let dlOptions = {}
 
