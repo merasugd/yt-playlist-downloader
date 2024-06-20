@@ -1,5 +1,6 @@
 {
     "split_download": false,
     "use_youtube_cookies": false,
-    "use_proxy": false
+    "use_proxy": false,
+    "internet_checking": true
 }

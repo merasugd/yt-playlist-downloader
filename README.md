@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.4**
+**v1.0.5-pre**
 
 older versions can be downloaded thru releases
 
@@ -38,6 +38,9 @@ v1.0.3-pre
 
 v1.0.3-pre2
 - Brings back **Split Download and Merging** as an option in the config (defaults to false)
+
+v1.0.5-pre
+- Made "internet checking" an option to `config.json` (defaults to: true)
 
 ## Note
 - The internet check might contribute to slowness. (it depends to your net).

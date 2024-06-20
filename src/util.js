@@ -20,6 +20,8 @@ module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 
 
 module.exports.checkInternet = function (d) {
     return new Promise(async(resolve) => {
+        if(!module.exports.config['internet_checking']) return resolve(true)
+            
         if(d) {
             prog.multipleProgress(d)
         } else {
