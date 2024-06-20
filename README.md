@@ -40,7 +40,7 @@ v1.0.3-pre2
 - Brings back **Split Download and Merging** as an option in the config (defaults to false)
 
 v1.0.5-pre
-- Made "internet checking" an option to `config.json` (defaults to: true)
+- Made "internet checking" an option on `config.json` (defaults to: true)
 
 ## Note
 - The internet check might contribute to slowness. (it depends to your net).
