@@ -53,7 +53,7 @@ function download(playlistTitle, data, bin, progressData) {
 
     function dl(uri, q) {
         return new Promise(async(resolve) => {
-
+            
             prog.multipleProgress([
                 ("Downloading \""+dl_title+'"').yellow,
                 progressData,
@@ -91,7 +91,7 @@ function download(playlistTitle, data, bin, progressData) {
                     { total: 100, current: Math.floor((current / 102) * 100), label: "metadata" }
                 ])
 
-                let r = await util.editVideoMetadata(playlistTitle, url, dl_path, nometadata)
+                let r = await util.editVideoMetadata(playlistTitle, dl_title, progressData, uri, dl_path, nometadata)
                 current = current + 1
 
                 prog.multipleProgress([
@@ -107,7 +107,7 @@ function download(playlistTitle, data, bin, progressData) {
             let audioStream = fs.createWriteStream(dl_raw_path)
             await pipeStream(audio, audioStream, "downloading")
 
-            let result = await util.editSongMetadata(playlistTitle, url, dl_raw_path, dl_path, progressData, dl_title)
+            let result = await util.editSongMetadata(playlistTitle, uri, dl_raw_path, dl_path, progressData, dl_title)
 
             return resolve(result)
 
@@ -267,6 +267,13 @@ function downloadLooper(arr, bin, pl, int) {
 
         let current = int+1
         let total = arr.length
+
+        let net = await util.checkInternet([
+            ('Downloading "'+pl+'"').yellow,
+            { current, total, label: 'playlist' },
+            { total: 100, current: 0, label: 'checking internet'.yellow }
+        ])
+        if(!net) return process.exit(1)
 
         prog.multipleProgress([
             ('Downloading "'+pl+'"').yellow,

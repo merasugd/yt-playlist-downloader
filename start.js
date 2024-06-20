@@ -33,13 +33,24 @@ let listofplaylist = (util.settings['playlists'] || []).map(v => {
 
     if(!v.playlistId || !v.quality || !v.format)  return 'not-valid'
     if(typeof v.playlistId !== 'string' || typeof v.quality !== 'string' || typeof v.format !== 'string')  return 'not-valid'
+
+    let format = v.playlistId+':'+v.quality+':'+v.format
+
+    if(v.settings) {
+        format = format+':'+JSON.stringify(v.settings)
+    } else {
+        format = format+":[]"
+    }
     
-    return v.playlistId+':'+v.quality+':'+v.format
+    return format
 }).filter(v => v !== 'not-valid')
 
 start()
 
 async function start() {
+    let net = await util.checkInternet()
+    if(!net) return process.exit(1)
+
     let result = await prompt()
 
     if(result === 100) return process.exit(0)
@@ -50,7 +61,7 @@ function prompt(plId, q, f, t) {
         prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green)
 
         let inner = String(t || await prompter.question("Multiple Playlist: (y/N) ")).toLowerCase()
-        if(inner === "y" || inner === 'yes') {
+        if(util.boolean(inner)) {
             let in_outputdir = path.resolve(String(await prompter.question("Output Dir: ")).replaceAll('"', ''))
             if(in_outputdir === "" || in_outputdir.startsWith(" ") || in_outputdir.startsWith('"') || in_outputdir.endsWith('"') || !fs.existsSync(in_outputdir) || !(fs.statSync(in_outputdir).isDirectory())) return resolve(await prompt(plId, q, f, t, inner))
 
@@ -76,13 +87,90 @@ function prompt(plId, q, f, t) {
         if(outputdir === "" || outputdir.startsWith(" ") || outputdir.startsWith('"') || outputdir.endsWith('"') || !fs.existsSync(outputdir) || !(fs.statSync(outputdir).isDirectory())) return resolve(await prompt(playlistId, quality, format))
 
         let move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
+        
+        let makeExceptions = await filters(format, quality)
 
         let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${playlistId}\nQuality: ${quality}\nFormat: ${format}\nOutputDir: ${outputdir}\nCompress: ${move ? false : true}\n\nAre you sure with this: (y/N) `))
         if(areyousure === "n" || areyousure === 'no') {
             return resolve(await prompt())
         }
  
-        return resolve(await main(false, playlistId, quality, format, outputdir, move))
+        return resolve(await main(false, playlistId, quality, format, outputdir, move, makeExceptions))
+    })
+}
+
+function filters(d_format, d_quality) {
+    return new Promise(async(resolve) => {
+        let makeOne = await prompter.question('Settings for a video: (y/N) ')
+        let all = []
+
+        if(makeOne === "n" || makeOne === 'no') {
+            return resolve(all)
+        }
+
+        function addUp(type) {
+            return new Promise(async(resolv) => {
+                let data = {}
+
+                if(type === 'GIVE_UP') {
+                    return resolv(all)
+                }
+
+                let id = await prompter.question(`Video ${type}: `)
+                if(id === 'n' || id === 'no' || id === '' || !id) return resolv(await addUp( (type === 'ID' ? 'TITLE' : (type === 'TITLE' ? 'INDEX' : 'GIVE_UP')) ))
+
+                if(type === 'ID') {
+                    data.videoId = id
+                } else if(type === 'TITLE') {
+                    data.videoTitle = id
+                } else if(type === 'INDEX') {
+                    data.videoIndex = id
+                } else {
+                    return resolv(await addUp('ID'))
+                }
+
+                let except = await prompter.question('Except It from downloads: (true/false) ')
+
+                if(util.boolean(except)) {
+                    data.exception = true
+                    all.push(data)
+
+                    let r_exception = await prompter.question(JSON.stringify(all, null, 3)+'\n\nIS This Good? (y/N) ')
+
+                    if(util.boolean(r_exception)) {
+                        return resolv(all)
+                    }
+                } else{
+                    data.exception = false
+                }
+
+                let format = await prompter.question('Video Format: (mp3/mp4) ')
+
+                if(format === 'mp3' || format === "mp4") {
+                    data.format = format
+                } else {
+                    data.format = d_format
+                }
+
+                let quality = await prompter.question('Video Quality: (highest/lowest) ')
+
+                if(quality === 'highest' || quality === "lowest") {
+                    data.quality = quality
+                } else {
+                    data.quality = d_quality
+                }
+
+                all.push(data)
+
+                let goods = await prompter.question(JSON.stringify(all, null, 3)+'\n\nIS This Good? (y/N) ')
+
+                if(util.boolean(goods)) {
+                    return resolv(all)
+                } else return resolv(await addUp('ID'))
+            })
+        }
+
+        return resolve(await addUp('ID'))
     })
 }
 
@@ -96,16 +184,17 @@ function looper(list, out, move, int) {
         
         let args = item.replace('\r', '').split(':')
         
-        if(args.length !== 3) return resolve(102)
+        if(args.length < 4) return resolve(102)
         
         let listId = args[0]
         let quality = args[1].toLowerCase()
         let format = args[2].toLowerCase()
-        
+        let settings = JSON.parse(args.slice(3).join(':'))
+
         if((quality === "highest" || quality === "lowest") === false) return resolve(103)
         if((format === "mp4" || format === "mp3") === false) return resolve(104)
 
-        let result = await main(false, listId, quality, format, out, move)
+        let result = await main(false, listId, quality, format, out, move, settings)
 
         if(result === 100) {
             return resolve(await looper(list, out, move, int+1))
@@ -113,7 +202,7 @@ function looper(list, out, move, int) {
     })
 }
 
-function main(inner, id, quality, format, outputdir, move) {
+function main(inner, id, quality, format, outputdir, move, settings) {
     return new Promise(async(resolve) => {
         prog.log("Starting...".green)
 
@@ -137,7 +226,7 @@ function main(inner, id, quality, format, outputdir, move) {
             return resolve(result)
         }
 
-        let search_result = await searching(id, { quality, format })
+        let search_result = await searching(id, { quality, format, settings })
 
         let playlist_title = search_result.playlist
         let playlist_videos = search_result.videos

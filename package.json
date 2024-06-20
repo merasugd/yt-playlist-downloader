@@ -1,6 +1,6 @@
 {
   "name": "yt-playlist-downloader",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Download YouTube Playlist",
   "main": "start.js",
   "scripts": {
@@ -11,6 +11,7 @@
   "license": "GPL-3.0-only",
   "dependencies": {
     "adm-zip": "^0.5.14",
+    "check-internet-connected": "^2.0.6",
     "colors": "^1.4.0",
     "ffmetadata": "^1.7.0",
     "ffmpeg-static": "^5.2.0",

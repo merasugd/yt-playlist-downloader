@@ -7,6 +7,8 @@ const ffmpeg = require('ffmpeg-static')
 const cp = require('child_process')
 const prog = require('./progress')
 
+const checkNet = require('check-internet-connected')
+
 metadata.setFfmpegPath(ffmpeg)
 
 module.exports.sanitizeTitle = function (title) {
@@ -15,6 +17,46 @@ module.exports.sanitizeTitle = function (title) {
 
 module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config.json'), { encoding: 'utf-8' }))
 module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings.json'), { encoding: 'utf-8' }))
+
+module.exports.checkInternet = function (d) {
+    return new Promise(async(resolve) => {
+        if(d) {
+            prog.multipleProgress(d)
+        } else {
+            prog.log('Checking internet...'.yellow)
+        }
+
+        checkNet({ timeout: 10000, retries: 5, domain: "google.com" })
+        .then(() => {
+            return resolve(true)
+        })
+        .catch((err) => {
+            prog.log(`No Internet: ${err}`.red)
+            return resolve(false)
+        })
+    })
+}
+
+module.exports.searchYt = function(uri, d) {
+    return new Promise(async(resolve) => {
+        let net = await module.exports.checkInternet(d)
+        if(!net) return process.exit(1)
+        
+        let data = await search({ videoId: uri.replaceAll('https://www.youtube.com/watch?v=', '') })
+
+        return resolve(data)
+    })
+}
+
+module.exports.boolean = function(bool) {
+    bool = bool.toLowerCase()
+
+    if(bool === 'y' || bool === 'yes' || bool === 'true') {
+        return true
+    }
+    
+    return false
+}
 
 module.exports.convertMp4 = function(inp, out) {
     return new Promise(async(resolve) => {
@@ -59,8 +101,6 @@ module.exports.convertMp3 = function(inp, out) {
 
 module.exports.editSongMetadata = function(playlistTitle, url, raw_path, final_path, progressData, song_title) {
     return new Promise(async(resolve) => {
-        let data = await search({ videoId: url.replaceAll('https://www.youtube.com/watch?v=', '') })
-
         prog.multipleProgress([
             ("Downloading \""+song_title+'"').yellow,
             progressData,
@@ -75,6 +115,12 @@ module.exports.editSongMetadata = function(playlistTitle, url, raw_path, final_p
             ("Downloading \""+song_title+'"').yellow,
             progressData,
             { total: 100, current: 99, label: 'metadata' }
+        ])
+
+        let data = await module.exports.searchYt(url, [
+            ("Downloading \""+song_title+'"').yellow,
+            progressData,
+            { total: 100, current: 99, label: 'checking internet'.yellow }
         ])
 
         metadata.write(final_path, {
@@ -99,9 +145,13 @@ module.exports.editSongMetadata = function(playlistTitle, url, raw_path, final_p
     })
 }
 
-module.exports.editVideoMetadata = function(playlistTitle, url, video_path, nometadata) {
+module.exports.editVideoMetadata = function(playlistTitle, video_title, progressData, url, video_path, nometadata) {
     return new Promise(async(resolve) => {
-        let data = await search({ videoId: url.replaceAll('https://www.youtube.com/watch?v=', '') })
+        let data = await module.exports.searchYt(url, [
+            ("Downloading \""+video_title+'"').yellow,
+            progressData,
+            { total: 100, current: 99, label: 'checking internet'.yellow }
+        ])
 
         await fsp.rename(video_path, nometadata)
 

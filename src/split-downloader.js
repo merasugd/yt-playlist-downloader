@@ -35,7 +35,7 @@ function download(playlistTitle, data, bin, progressData) {
     let ytIdentityToken = typeof util.settings['youtube_identity_token'] === 'string' && util.settings['youtube_identity_token'] !== '' && !util.settings['youtube_identity_token'].startsWith(' ') ? util.settings['youtube_identity_token'] : undefined
 
     let dlOptions = {}
-s
+
     if(util.config['use_youtube_cookies']) {
         dlOptions = cookies !== '' && !cookies.startsWith(' ') ? Object.assign({ requestOptions: { headers: { cookie: cookies, 'x-youtube-identity-token': ytIdentityToken } } }, dlOptions) : dlOptions
     }
@@ -50,7 +50,7 @@ s
 
     function dl(uri, q, f) {
         return new Promise(async(resolve) => {
-
+            
             prog.multipleProgress([
                 ("Downloading \""+dl_title+'"').yellow,
                 progressData,
@@ -187,7 +187,7 @@ s
                         { total: 100, current: Math.floor((current / total) * 100), label: 'metadata' }
                     ])
 
-                    await util.editVideoMetadata(playlistTitle, url, dl_path, nometadata)
+                    await util.editVideoMetadata(playlistTitle, dl_title, progressData, url, dl_path, nometadata)
 
                     current = current + 1
 
@@ -227,6 +227,13 @@ function downloadLooper(arr, bin, pl, int) {
 
         let current = int+1
         let total = arr.length
+
+        let net = await util.checkInternet([
+            ('Downloading "'+pl+'"').yellow,
+            { current, total, label: 'playlist' },
+            { total: 100, current: 0, label: 'checking internet'.yellow }
+        ])
+        if(!net) return process.exit(1)
 
         prog.multipleProgress([
             ('Downloading "'+pl+'"').yellow,

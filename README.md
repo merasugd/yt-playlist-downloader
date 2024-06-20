@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.3**
+**v1.0.4**
 
 older versions can be downloaded thru releases
 
@@ -25,6 +25,11 @@ v1.0.3
 - moved proxy server setting and youtube identity token setting to `settings.json`
 - Cleaned some dirty code
 
+v1.0.4
+- Fixed an error regarding split-download.
+- Added exceptions and settings for certain video.
+- Added a check if you are connected to internet.
+
 ## Pre-Releases
 v1.0.3-pre
 - Removed **Split Download and Merging**
@@ -35,6 +40,7 @@ v1.0.3-pre2
 - Brings back **Split Download and Merging** as an option in the config (defaults to false)
 
 ## Note
+- The internet check might contribute to slowness. (it depends to your net).
 - This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
 - The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because one-download quality is sh#t.
 
