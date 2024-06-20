@@ -108,13 +108,13 @@ module.exports.editVideoMetadata = function(playlistTitle, url, video_path, nome
 
         let proc = cp.spawn(ffmpeg, [
             '-i', nometadata,
-            '-metadata', `title="${data.title}"`,
-            '-metadata', `artist="${data.author.name}"`,
+            '-metadata', `title=${data.title}`,
+            '-metadata', `artist=${data.author.name}`,
             '-metadata', `year=${data.uploadDate.split('-')[0]}`,
             '-metadata', `date=${data.uploadDate.split('-')[0]}`,
-            '-metadata', `genre="${data.genre}"`,
-            '-metadata', `album="${playlistTitle}"`,
-            '-metadata', `description="${data.description}"`,
+            '-metadata', `genre=${data.genre}`,
+            '-metadata', `album=${playlistTitle}`,
+            '-metadata', `description=${data.description}`,
             '-codec', 'copy',
             '-y', video_path
         ], {
