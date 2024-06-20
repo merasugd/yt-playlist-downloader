@@ -28,7 +28,7 @@ if(!fs.existsSync(path.join(__dirname, "cookies.txt"))) fs.writeFileSync(path.jo
 
 if(!fs.existsSync(path.join(__dirname, 'bin'))) fs.mkdirSync(path.join(__dirname, 'bin'))
 
-let listofplaylist = (util.config['playlists'] || []).map(v => {
+let listofplaylist = (util.settings['playlists'] || []).map(v => {
     if(typeof v !== 'object') return 'not-valid'
 
     if(!v.playlistId || !v.quality || !v.format)  return 'not-valid'
@@ -121,7 +121,7 @@ function main(inner, id, quality, format, outputdir, move) {
             let result = await looper(listofplaylist, outputdir, move, 0)
 
             if(result === 101) {
-                prog.log("Empty playlists.txt".red.bold)
+                prog.log("Empty playlists... please check settings.json".red.bold)
                 return process.exit(1)
             } else if(result === 102) {
                 prog.log("Found an invalid format use...".red.bold)
