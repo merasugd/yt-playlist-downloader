@@ -7,13 +7,13 @@ const prompter = readline.createInterface({
     output: process.stdout
 })
 
-const util = require('./src/util')
+const util = require('./utils/tools')
+const prog = require('./utils/progress')
 
-const prog = require('./src/progress')
-const searching = require('./src/searching')
-const compressor = require('./src/compressor')
+const searching = require('./functions/searching')
+const compressor = require('./functions/compressor')
 
-const downloader = util.config['split_download'] ? require('./src/split-downloader') : require('./src/downloader')
+const downloader = util.config['split_download'] ? require('./downloader/split') : require('./downloader/single')
 
 //unused since final 1.0.3 release
 /*if(!fs.existsSync(path.join(__dirname, "playlists.txt"))) fs.writeFileSync(path.join(__dirname, "playlists.txt"), `## this is used so you can download multiple playlist
@@ -26,7 +26,7 @@ const downloader = util.config['split_download'] ? require('./src/split-download
 `)
 if(!fs.existsSync(path.join(__dirname, "cookies.txt"))) fs.writeFileSync(path.join(__dirname, "cookies.txt"), '')*/
 
-if(!fs.existsSync(path.join(__dirname, 'bin'))) fs.mkdirSync(path.join(__dirname, 'bin'))
+if(!fs.existsSync(path.join(__dirname, '..', '..', '.cache'))) fs.mkdirSync(path.join(__dirname, '..', '..', '.cache'))
 
 let listofplaylist = (util.settings['playlists'] || []).map(v => {
     if(typeof v !== 'object') return 'not-valid'
@@ -69,7 +69,7 @@ function prompt(plId, q, f, t, verMsg) {
 
             let in_move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
 
-            let in_areyousure = String(await prompter.question(`Data:\nMultiple Playlists/playlists.txt: ${inner}\nOutputDir: ${in_outputdir}\nCompress: ${in_move ? false : true}\n\nAre you sure with this: (y/N) `))
+            let in_areyousure = String(await prompter.question(`Data:\nMultiple Playlists/playlists.txt: ${(inner).cyan}\nOutputDir: ${(in_outputdir).cyan}\nCompress: ${String(in_move ? false : true).cyan}\n\nAre you sure with this: (y/N) `))
             if(in_areyousure === "n" || in_areyousure === 'no') {
                 return resolve(await prompt(false, false, false, false, verMsg))
             }
@@ -92,7 +92,7 @@ function prompt(plId, q, f, t, verMsg) {
         
         let makeExceptions = await filters(format, quality)
 
-        let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${playlistId}\nQuality: ${quality}\nFormat: ${format}\nOutputDir: ${outputdir}\nCompress: ${move ? false : true}\n\nAre you sure with this: (y/N) `))
+        let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${(playlistId).cyan}\nQuality: ${(quality).cyan}\nFormat: ${(format).cyan}\nOutputDir: ${(outputdir).cyan}\nCompress: ${String(move ? false : true).cyan}\nSettings: ${JSON.stringify(makeExceptions).cyan}\n\nAre you sure with this: (y/N) `))
         if(areyousure === "n" || areyousure === 'no') {
             return resolve(await prompt(false, false, false, false, verMsg))
         }
@@ -113,12 +113,13 @@ function filters(d_format, d_quality) {
         function addUp(type) {
             return new Promise(async(resolv) => {
                 let data = {}
+                let tit = `[VideoSetting:${all.length+1}] `
 
                 if(type === 'GIVE_UP') {
                     return resolv(all)
                 }
 
-                let id = await prompter.question(`Video ${type}: `)
+                let id = await prompter.question(tit+`Video ${type}: `)
                 if(id === 'n' || id === 'no' || id === '' || !id) return resolv(await addUp( (type === 'ID' ? 'TITLE' : (type === 'TITLE' ? 'INDEX' : 'GIVE_UP')) ))
 
                 if(type === 'ID') {
@@ -131,22 +132,26 @@ function filters(d_format, d_quality) {
                     return resolv(await addUp('ID'))
                 }
 
-                let except = await prompter.question('Except It from downloads: (true/false) ')
+                let except = await prompter.question(tit+'Except It from downloads: (true/false) ')
 
                 if(util.boolean(except)) {
                     data.exception = true
                     all.push(data)
 
-                    let r_exception = await prompter.question(JSON.stringify(all, null, 3)+'\n\nIS This Good? (y/N) ')
+                    let s_exception = await prompter.question(JSON.stringify(data, null, 3).yellow+'\n\n'+tit+'Are you sure? (y/N) ')
+                    if(!util.boolean(s_exception)) {
+                        return resolv(await addUp('ID'))
+                    }
 
+                    let r_exception = await prompter.question(JSON.stringify(all, null, 3).yellow+'\n\n'+tit+'Is this all? (y/N) ')
                     if(util.boolean(r_exception)) {
                         return resolv(all)
-                    }
+                    } else return resolv(await addUp('ID'))
                 } else{
                     data.exception = false
                 }
 
-                let format = await prompter.question('Video Format: (mp3/mp4) ')
+                let format = await prompter.question(tit+'Video Format: (mp3/mp4) ')
 
                 if(format === 'mp3' || format === "mp4") {
                     data.format = format
@@ -154,7 +159,7 @@ function filters(d_format, d_quality) {
                     data.format = d_format
                 }
 
-                let quality = await prompter.question('Video Quality: (highest/lowest) ')
+                let quality = await prompter.question(tit+'Video Quality: (highest/lowest) ')
 
                 if(quality === 'highest' || quality === "lowest") {
                     data.quality = quality
@@ -162,10 +167,14 @@ function filters(d_format, d_quality) {
                     data.quality = d_quality
                 }
 
+                let sure = await prompter.question(JSON.stringify(data, null, 3).yellow+'\n\n'+tit+'Are you sure? (y/N) ')
+                if(!util.boolean(sure)) {
+                    return resolv(await addUp('ID'))
+                }
+
                 all.push(data)
 
-                let goods = await prompter.question(JSON.stringify(all, null, 3)+'\n\nIS This Good? (y/N) ')
-
+                let goods = await prompter.question(JSON.stringify(all, null, 3).yellow+'\n\n'+tit+'Is this all? (y/N) ')
                 if(util.boolean(goods)) {
                     return resolv(all)
                 } else return resolv(await addUp('ID'))

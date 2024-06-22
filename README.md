@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.5-pre2**
+**v1.0.5**
 
 older versions can be downloaded thru releases
 
@@ -30,6 +30,14 @@ v1.0.4
 - Added exceptions and settings for certain video.
 - Added a check if you are connected to internet.
 
+v1.0.5
+- Made prompt a little cleaner.
+- Fixed video-specific settings prompt.
+- Added checking for video-specific settings.
+- Added confirmation prompt before proceed prompt in the video-specific settings prompt.
+- Made the project structure more cleaner.
+- renamed bin to .cache
+
 ## Pre-Releases
 v1.0.3-pre
 - Removed **Split Download and Merging**
@@ -43,7 +51,7 @@ v1.0.5-pre
 - Made "internet checking" an option on `config.json` (defaults to: true)
 
 v1.0.5-pre2
-- Fixed something in `README.md`
+- Fixed something in `README.md`nm 
 - Made `split_download` defaults to true.
 - Added version checking.
 

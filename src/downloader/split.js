@@ -7,10 +7,12 @@ const HttpsProxyAgent = require('https-proxy-agent')
 
 const cp = require('child_process')
 
-const pather = path.join(__dirname, '..', 'bin')
+const root = path.join(__dirname, '..', '..')
+const pather = path.join(root, '.cache')
 
-const prog = require('./progress')
-const util = require('./util')
+const prog = require('../utils/progress')
+const util = require('../utils/tools')
+const media = require('../utils/media')
 
 function download(playlistTitle, data, bin, progressData) {
     let url = data.url;
@@ -175,7 +177,7 @@ function download(playlistTitle, data, bin, progressData) {
                         { total: 100, current: Math.floor((current / total) * 100), label: 'converting' }
                     ])
 
-                    await util.convertMp4(dl_raw_path, dl_path)
+                    await media.convertMp4(dl_raw_path, dl_path)
 
                     if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
 
@@ -187,7 +189,7 @@ function download(playlistTitle, data, bin, progressData) {
                         { total: 100, current: Math.floor((current / total) * 100), label: 'metadata' }
                     ])
 
-                    await util.editVideoMetadata(playlistTitle, dl_title, progressData, url, dl_path, nometadata)
+                    await media.editVideoMetadata(playlistTitle, dl_title, progressData, url, dl_path, nometadata)
 
                     current = current + 1
 
@@ -207,7 +209,7 @@ function download(playlistTitle, data, bin, progressData) {
         if(result === 100) {
             if(fs.existsSync(dl_audio_path) && format === 'mp3') {
                 await require('fs/promises').rename(dl_audio_path, dl_raw_path)
-                await util.editSongMetadata(playlistTitle, url, dl_raw_path, dl_path, progressData, dl_title)
+                await media.editSongMetadata(playlistTitle, url, dl_raw_path, dl_path, progressData, dl_title)
             }
             
             if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })

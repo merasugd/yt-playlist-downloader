@@ -1,7 +1,7 @@
 const yt = require('yt-search')
 
-const prog = require('./progress')
-const util = require('./util')
+const prog = require('../utils/progress')
+const util = require('../utils/tools')
 
 module.exports = function(playlistId, data) {
     return new Promise(async(resolve) => {
@@ -25,6 +25,18 @@ module.exports = function(playlistId, data) {
 
             let format = settings ? settings.format : data.format
             let quality = settings ? settings.quality : data.quality
+
+            if(format === 'mp4' || format === 'mp3') {
+                format = format
+            } else {
+                format = data.format
+            }
+
+            if(quality === 'highest' || quality === 'lowest') {
+                quality = quality
+            } else {
+                quality = data.quality
+            }
 
             return {
                 title: v.title,

@@ -1,12 +1,10 @@
-const adm = require('adm-zip')
+const AdmZip = require('adm-zip')
 const fs = require('fs/promises')
 const fs_s = require('fs')
 const path = require('path')
 
-const prog = require('./progress')
-const AdmZip = require('adm-zip')
-
-const util = require('./util')
+const prog = require('../utils/progress')
+const util = require('../utils/tools')
 
 function copyFolder(data, source, output) {
     let outputDir = path.join(output, util.sanitizeTitle(data.title))

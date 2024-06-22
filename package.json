@@ -1,11 +1,12 @@
 {
   "name": "yt-playlist-downloader",
-  "version": "1.0.5-pre2",
+  "version": "1.0.5",
+  "lastrelease": "1.0.5",
   "description": "Download YouTube Playlist",
   "main": "start.js",
   "scripts": {
     "test": "node test.js",
-    "start": "node --no-deprecation start.js"
+    "start": "node --no-deprecation src/start.js"
   },
   "author": "MerasGD",
   "license": "GPL-3.0-only",
