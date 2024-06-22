@@ -59,6 +59,7 @@ v1.0.6-pre
 - Renamed `settings.json` to `download.json`.
 - Moved `config.json` and `download.json` is moved to `settings` directory.
 - Prompt is cleaner.
+- Fixed `version checking`.
 
 ## Note
 - The internet check might contribute to slowness. (it depends to your net).

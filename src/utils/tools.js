@@ -78,7 +78,7 @@ module.exports.versionCheck = function() {
                 verCheck.pre = false
                 verCheck.match = false
                 verCheck.msg = `Using a pre-release version. Please update to v${newVer}`.yellow
-            } else if(oldVer === newVer) {
+            } else if(oldVer === newVer || oldVer === lastrelease) {
                 verCheck.pre = false
                 verCheck.match = true
                 verCheck.msg = `Latest Version: ${oldVer}`.cyan
