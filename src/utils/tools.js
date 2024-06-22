@@ -14,8 +14,8 @@ module.exports.sanitizeTitle = function (title) {
     return String(title).replaceAll(/[\\/:*"?|<>]/g, '');
 }
 
-module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'config.json'), { encoding: 'utf-8' }))
-module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings.json'), { encoding: 'utf-8' }))
+module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'config.json'), { encoding: 'utf-8' }))
+module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'download.json'), { encoding: 'utf-8' }))
 
 module.exports.checkInternet = function (d) {
     return new Promise(async(resolve) => {

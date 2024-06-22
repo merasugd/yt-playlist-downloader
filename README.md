@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.5**
+**v1.0.6-pre**
 
 older versions can be downloaded thru releases
 
@@ -54,6 +54,11 @@ v1.0.5-pre2
 - Fixed something in `README.md`
 - Made `split_download` defaults to true.
 - Added version checking.
+
+v1.0.6-pre
+- Renamed `settings.json` to `download.json`.
+- Moved `config.json` and `download.json` is moved to `settings` directory.
+- Prompt is cleaner.
 
 ## Note
 - The internet check might contribute to slowness. (it depends to your net).

@@ -1,6 +1,6 @@
 {
   "name": "yt-playlist-downloader",
-  "version": "1.0.5",
+  "version": "1.0.6-pre",
   "lastrelease": "1.0.5",
   "description": "Download YouTube Playlist",
   "main": "start.js",

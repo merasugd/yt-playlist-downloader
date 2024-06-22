@@ -69,7 +69,8 @@ function prompt(plId, q, f, t, verMsg) {
 
             let in_move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
 
-            let in_areyousure = String(await prompter.question(`Data:\nMultiple Playlists/playlists.txt: ${(inner).cyan}\nOutputDir: ${(in_outputdir).cyan}\nCompress: ${String(in_move ? false : true).cyan}\n\nAre you sure with this: (y/N) `))
+            prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+            let in_areyousure = String(await prompter.question(`Data:\nMultiple Playlists: ${(inner === 'y' ? 'true' : 'false').cyan}\nOutputDir: ${(in_outputdir).cyan}\nCompress: ${String(in_move ? false : true).cyan}\n\nAre you sure with this: (y/N) `))
             if(in_areyousure === "n" || in_areyousure === 'no') {
                 return resolve(await prompt(false, false, false, false, verMsg))
             }
@@ -90,8 +91,9 @@ function prompt(plId, q, f, t, verMsg) {
 
         let move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
         
-        let makeExceptions = await filters(format, quality)
+        let makeExceptions = await filters(verMsg, format, quality)
 
+        prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
         let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${(playlistId).cyan}\nQuality: ${(quality).cyan}\nFormat: ${(format).cyan}\nOutputDir: ${(outputdir).cyan}\nCompress: ${String(move ? false : true).cyan}\nSettings: ${JSON.stringify(makeExceptions).cyan}\n\nAre you sure with this: (y/N) `))
         if(areyousure === "n" || areyousure === 'no') {
             return resolve(await prompt(false, false, false, false, verMsg))
@@ -101,7 +103,7 @@ function prompt(plId, q, f, t, verMsg) {
     })
 }
 
-function filters(d_format, d_quality) {
+function filters(verMsg, d_format, d_quality) {
     return new Promise(async(resolve) => {
         let makeOne = await prompter.question('Settings for a video: (y/N) ')
         let all = []
@@ -138,11 +140,13 @@ function filters(d_format, d_quality) {
                     data.exception = true
                     all.push(data)
 
+                    prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
                     let s_exception = await prompter.question(JSON.stringify(data, null, 3).yellow+'\n\n'+tit+'Are you sure? (y/N) ')
                     if(!util.boolean(s_exception)) {
                         return resolv(await addUp('ID'))
                     }
 
+                    prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
                     let r_exception = await prompter.question(JSON.stringify(all, null, 3).yellow+'\n\n'+tit+'Is this all? (y/N) ')
                     if(util.boolean(r_exception)) {
                         return resolv(all)
@@ -167,6 +171,7 @@ function filters(d_format, d_quality) {
                     data.quality = d_quality
                 }
 
+                prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
                 let sure = await prompter.question(JSON.stringify(data, null, 3).yellow+'\n\n'+tit+'Are you sure? (y/N) ')
                 if(!util.boolean(sure)) {
                     return resolv(await addUp('ID'))
@@ -174,6 +179,7 @@ function filters(d_format, d_quality) {
 
                 all.push(data)
 
+                prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
                 let goods = await prompter.question(JSON.stringify(all, null, 3).yellow+'\n\n'+tit+'Is this all? (y/N) ')
                 if(util.boolean(goods)) {
                     return resolv(all)
