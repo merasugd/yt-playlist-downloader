@@ -51,25 +51,27 @@ async function start() {
     let net = await util.checkInternet()
     if(!net) return process.exit(1)
 
-    let result = await prompt()
+    let verCheck = await util.versionCheck()
+
+    let result = await prompt(false, false, false, false, verCheck.msg)
 
     if(result === 100) return process.exit(0)
 }
 
-function prompt(plId, q, f, t) {
+function prompt(plId, q, f, t, verMsg) {
     return new Promise(async(resolve) => {
-        prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green)
+        prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
 
         let inner = String(t || await prompter.question("Multiple Playlist: (y/N) ")).toLowerCase()
         if(util.boolean(inner)) {
             let in_outputdir = path.resolve(String(await prompter.question("Output Dir: ")).replaceAll('"', ''))
-            if(in_outputdir === "" || in_outputdir.startsWith(" ") || in_outputdir.startsWith('"') || in_outputdir.endsWith('"') || !fs.existsSync(in_outputdir) || !(fs.statSync(in_outputdir).isDirectory())) return resolve(await prompt(plId, q, f, t, inner))
+            if(in_outputdir === "" || in_outputdir.startsWith(" ") || in_outputdir.startsWith('"') || in_outputdir.endsWith('"') || !fs.existsSync(in_outputdir) || !(fs.statSync(in_outputdir).isDirectory())) return resolve(await prompt(plId, q, f, inner, verMsg))
 
             let in_move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
 
             let in_areyousure = String(await prompter.question(`Data:\nMultiple Playlists/playlists.txt: ${inner}\nOutputDir: ${in_outputdir}\nCompress: ${in_move ? false : true}\n\nAre you sure with this: (y/N) `))
             if(in_areyousure === "n" || in_areyousure === 'no') {
-                return resolve(await prompt())
+                return resolve(await prompt(false, false, false, false, verMsg))
             }
 
             return resolve(await main(true, false, false, false, in_outputdir, in_move))
@@ -78,13 +80,13 @@ function prompt(plId, q, f, t) {
         let playlistId = plId || await prompter.question("Playlist ID: ")
 
         let quality = String(q || (await prompter.question("Quality (highest/lowest): "))).toLowerCase()
-        if((quality === "highest" || quality === "lowest") === false) return resolve(await prompt(playlistId))
+        if((quality === "highest" || quality === "lowest") === false) return resolve(await prompt(playlistId, q, f, t, verMsg))
 
         let format = String(f || await prompter.question("Format of Videos (mp4/mp3): ")).toLowerCase()
-        if((format === "mp4" || format === "mp3") === false) return resolve(await prompt(playlistId, quality))
+        if((format === "mp4" || format === "mp3") === false) return resolve(await prompt(playlistId, quality, f, t, verMsg))
 
         let outputdir = path.resolve(String(await prompter.question("Output Dir: ")).replaceAll('"', ''))
-        if(outputdir === "" || outputdir.startsWith(" ") || outputdir.startsWith('"') || outputdir.endsWith('"') || !fs.existsSync(outputdir) || !(fs.statSync(outputdir).isDirectory())) return resolve(await prompt(playlistId, quality, format))
+        if(outputdir === "" || outputdir.startsWith(" ") || outputdir.startsWith('"') || outputdir.endsWith('"') || !fs.existsSync(outputdir) || !(fs.statSync(outputdir).isDirectory())) return resolve(await prompt(playlistId, quality, format, t, verMsg))
 
         let move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
         
@@ -92,7 +94,7 @@ function prompt(plId, q, f, t) {
 
         let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${playlistId}\nQuality: ${quality}\nFormat: ${format}\nOutputDir: ${outputdir}\nCompress: ${move ? false : true}\n\nAre you sure with this: (y/N) `))
         if(areyousure === "n" || areyousure === 'no') {
-            return resolve(await prompt())
+            return resolve(await prompt(false, false, false, false, verMsg))
         }
  
         return resolve(await main(false, playlistId, quality, format, outputdir, move, makeExceptions))

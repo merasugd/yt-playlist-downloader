@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.5-pre**
+**v1.0.5-pre2**
 
 older versions can be downloaded thru releases
 
@@ -42,14 +42,19 @@ v1.0.3-pre2
 v1.0.5-pre
 - Made "internet checking" an option on `config.json` (defaults to: true)
 
+v1.0.5-pre2
+- Fixed something in `README.md`
+- Made `split_download` defaults to true.
+- Added version checking.
+
 ## Note
 - The internet check might contribute to slowness. (it depends to your net).
 - This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
 - The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because one-download quality is sh#t.
 
 ## Requires
-- FFmpeg
-- Node.js 20+
+- [FFmpeg](https://ffmpeg.org/)
+- [Node.js 20+](https://nodejs.org/en)
 
 ## Installation
 
@@ -66,7 +71,7 @@ v1.0.5-pre
 ## Features
 
 - **Audio Only Download**: Option to download only the audio from YouTube videos.
-- **Multiple Playlists**: Supports downloading multiple playlists listed in `settings.jsom`.
+- **Multiple Playlists**: Supports downloading multiple playlists listed in `settings.json`.
 - **YouTube Cookies**: Can use YouTube cookies stored in `settings.json` for downloading restricted content.
 - **Simple Download**: Easy to use for downloading YouTube content.
 - **Compression**: Option to compress downloads into a zip file or move them to a directory.
