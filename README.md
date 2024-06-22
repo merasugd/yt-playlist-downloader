@@ -51,7 +51,7 @@ v1.0.5-pre
 - Made "internet checking" an option on `config.json` (defaults to: true)
 
 v1.0.5-pre2
-- Fixed something in `README.md`nm 
+- Fixed something in `README.md`
 - Made `split_download` defaults to true.
 - Added version checking.
 
