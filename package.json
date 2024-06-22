@@ -5,7 +5,7 @@
   "description": "Download YouTube Playlist",
   "main": "start.js",
   "scripts": {
-    "test": "node test.js",
+    "test": "node --inspect src/start.js",
     "start": "node --no-deprecation src/start.js"
   },
   "author": "MerasGD",
