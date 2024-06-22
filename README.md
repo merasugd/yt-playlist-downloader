@@ -57,7 +57,7 @@ v1.0.5-pre2
 
 v1.0.6-pre
 - Renamed `settings.json` to `download.json`.
-- Moved `config.json` and `download.json` is moved to `settings` directory.
+- Moved `config.json` and `download.json` to `settings` directory.
 - Prompt is cleaner.
 - Fixed `version checking`.
 
