@@ -19,7 +19,7 @@ function copyFolder(data, source, output) {
 
         let files = await fs.readdir(source)
 
-        let result = await copyLooper(files, outputDir, source, files.length, 0, true)
+        let result = await copyLooper(data, files, outputDir, source, files.length, 0, true)
 
         if(result === 100) {
             return resolve(outputDir)
@@ -27,13 +27,16 @@ function copyFolder(data, source, output) {
     })
 }
 
-function copyLooper(files, output, source, total, int, d) {
+function copyLooper(pl, files, output, source, total, int, d) {
     return new Promise(async(resolve) => {
         let file = files[int]
 
         if(!file || total <= int) return resolve(100)
 
-        if(d) prog.progress(int+1, total, 'moving')
+        if(d) prog.multipleProgress([
+            String(pl.title).green.bold,
+            { label: 'moving', current: int+1, total }
+        ])
         
         if(fs_s.statSync(path.join(source, file)).isDirectory()) {
             let new_o = path.join(output, file)
@@ -43,10 +46,10 @@ function copyLooper(files, output, source, total, int, d) {
 
             await fs.mkdir(new_o)
             
-            let result = await copyLooper(new_files, new_o, new_s, new_files.length, 0, false)
+            let result = await copyLooper(pl, new_files, new_o, new_s, new_files.length, 0, false)
 
             if(result === 100) {
-                return resolve((await copyLooper(files, output, source, total, int+1, d)))
+                return resolve((await copyLooper(pl, files, output, source, total, int+1, d)))
             }
         } else {
             let filePath = path.join(source, file)
@@ -58,7 +61,9 @@ function copyLooper(files, output, source, total, int, d) {
             readStream.pipe(writeStream)
 
             writeStream.on("finish", async() => {
-                return resolve((await copyLooper(files, output, source, total, int+1, d)))
+                if(fs_s.existsSync(filePath)) await fs.rm(newFilePath, { recursive: true, force: true })
+                 
+                return resolve((await copyLooper(pl, files, output, source, total, int+1, d)))
             })
         }
     })
@@ -70,18 +75,32 @@ module.exports = function(data, move, output) {
 
     return new Promise(async(resolve) => {
         if(move) {
-            prog.log(("Moving downloaded playlist to "+output).yellow)
+            prog.multipleProgress([
+                String(data.title).green.bold,
+                ("Moving downloaded playlist to "+output).yellow
+            ])
             let out = await copyFolder(data, data.path, output)
-            prog.log(("Successfully moved downloaded playlist to "+out).green)
+            prog.multipleProgress([
+                ("Successfully moved downloaded playlist to "+out).green
+            ])
             final = out
         } else {
-            prog.log("Creating zip...".yellow)
+            prog.multipleProgress([
+                String(data.title).green.bold,
+                "Creating Zip".yellow
+            ])
             let zip = new AdmZip()
 
-            prog.log("Compressing...".yellow)
+            prog.multipleProgress([
+                String(data.title).green.bold,
+                "Compressing".yellow
+            ])
             await zip.addLocalFolderPromise(data.path)
 
-            prog.log(("Writing zip to "+outl+"...").yellow)
+            prog.multipleProgress([
+                String(data.title).green.bold,
+                "Writing Zip".yellow
+            ])
             await zip.writeZipPromise(outl)
 
             prog.log(("Successfully zipped downloaded playlist to "+outl).green)

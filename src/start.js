@@ -9,11 +9,12 @@ const prompter = readline.createInterface({
 
 const util = require('./utils/tools')
 const prog = require('./utils/progress')
+const manager = require('./utils/manager')
 
 const searching = require('./functions/searching')
 const compressor = require('./functions/compressor')
 
-const downloader = util.config['split_download'] ? require('./downloader/split') : require('./downloader/single')
+const downloader = require('./downloader/main')
 
 //unused since final 1.0.3 release
 /*if(!fs.existsSync(path.join(__dirname, "playlists.txt"))) fs.writeFileSync(path.join(__dirname, "playlists.txt"), `## this is used so you can download multiple playlist
@@ -34,7 +35,7 @@ let listofplaylist = (util.settings['playlists'] || []).map(v => {
     if(!v.playlistId || !v.quality || !v.format)  return 'not-valid'
     if(typeof v.playlistId !== 'string' || typeof v.quality !== 'string' || typeof v.format !== 'string')  return 'not-valid'
 
-    let format = v.playlistId+':'+v.quality+':'+v.format
+    let format = v.playlistId.replaceAll(':', '$url_splitting$')+':'+v.quality+':'+v.format
 
     if(v.settings) {
         format = format+':'+JSON.stringify(v.settings)
@@ -60,7 +61,20 @@ async function start() {
 
 function prompt(plId, q, f, t, verMsg) {
     return new Promise(async(resolve) => {
-        prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+        prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+
+        let isThereLeft = manager.left()
+
+        if(isThereLeft && util.config['safe_download']) {
+            prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+            let left = await prompter.question('Unfinished downloads found, do you want to finsih it? (y/N) '.yellow)
+
+            if(util.boolean(left)) {
+                return resolve(await main(false, false, false, false, false, false, false, true))
+            } else {
+                manager.reset()
+            }
+        }
 
         let inner = String(t || await prompter.question("Multiple Playlist: (y/N) ")).toLowerCase()
         if(util.boolean(inner)) {
@@ -69,7 +83,7 @@ function prompt(plId, q, f, t, verMsg) {
 
             let in_move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
 
-            prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+            prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
             let in_areyousure = String(await prompter.question(`Data:\nMultiple Playlists: ${(inner === 'y' ? 'true' : 'false').cyan}\nOutputDir: ${(in_outputdir).cyan}\nCompress: ${String(in_move ? false : true).cyan}\n\nAre you sure with this: (y/N) `))
             if(in_areyousure === "n" || in_areyousure === 'no') {
                 return resolve(await prompt(false, false, false, false, verMsg))
@@ -93,7 +107,7 @@ function prompt(plId, q, f, t, verMsg) {
         
         let makeExceptions = await filters(verMsg, format, quality)
 
-        prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+        prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
         let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${(playlistId).cyan}\nQuality: ${(quality).cyan}\nFormat: ${(format).cyan}\nOutputDir: ${(outputdir).cyan}\nCompress: ${String(move ? false : true).cyan}\nSettings: ${JSON.stringify(makeExceptions).cyan}\n\nAre you sure with this: (y/N) `))
         if(areyousure === "n" || areyousure === 'no') {
             return resolve(await prompt(false, false, false, false, verMsg))
@@ -140,13 +154,13 @@ function filters(verMsg, d_format, d_quality) {
                     data.exception = true
                     all.push(data)
 
-                    prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+                    prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
                     let s_exception = await prompter.question(JSON.stringify(data, null, 3).yellow+'\n\n'+tit+'Are you sure? (y/N) ')
                     if(!util.boolean(s_exception)) {
                         return resolv(await addUp('ID'))
                     }
 
-                    prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+                    prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
                     let r_exception = await prompter.question(JSON.stringify(all, null, 3).yellow+'\n\n'+tit+'Is this all? (y/N) ')
                     if(util.boolean(r_exception)) {
                         return resolv(all)
@@ -171,7 +185,7 @@ function filters(verMsg, d_format, d_quality) {
                     data.quality = d_quality
                 }
 
-                prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+                prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
                 let sure = await prompter.question(JSON.stringify(data, null, 3).yellow+'\n\n'+tit+'Are you sure? (y/N) ')
                 if(!util.boolean(sure)) {
                     return resolv(await addUp('ID'))
@@ -179,7 +193,7 @@ function filters(verMsg, d_format, d_quality) {
 
                 all.push(data)
 
-                prog.log("welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
+                prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
                 let goods = await prompter.question(JSON.stringify(all, null, 3).yellow+'\n\n'+tit+'Is this all? (y/N) ')
                 if(util.boolean(goods)) {
                     return resolv(all)
@@ -198,12 +212,24 @@ function looper(list, out, move, int) {
         let item = list[int]
         
         if(!item || list.length <= int) return resolve(100)
-        
+
+        if(typeof item === 'object' && item.data) {
+            let moved = item.move
+            let output = item.output
+            let id = item.id
+
+            let result = await main(false, id, false, false, output, moved, false, item)
+
+            if(result === 100) {
+                return resolve(await looper(list, output, moved, int+1))
+            }
+        }
+
         let args = item.replace('\r', '').split(':')
         
         if(args.length < 4) return resolve(102)
         
-        let listId = args[0]
+        let listId = args[0].replaceAll('$url_splitting$', ':')
         let quality = args[1].toLowerCase()
         let format = args[2].toLowerCase()
         let settings = JSON.parse(args.slice(3).join(':'))
@@ -219,7 +245,7 @@ function looper(list, out, move, int) {
     })
 }
 
-function main(inner, id, quality, format, outputdir, move, settings) {
+function main(inner, id, quality, format, outputdir, move, settings, isThereLeft) {
     return new Promise(async(resolve) => {
         prog.log("Starting...".green)
 
@@ -243,12 +269,18 @@ function main(inner, id, quality, format, outputdir, move, settings) {
             return resolve(result)
         }
 
-        let search_result = await searching(id, { quality, format, settings })
+        if(typeof isThereLeft === 'boolean' && isThereLeft) {
+            let all = manager.left()
+
+            return resolve(await looper(all, false, false, 0))
+        }
+
+        let search_result = isThereLeft ? isThereLeft.data : await searching(id, { quality, format, settings })
 
         let playlist_title = search_result.playlist
         let playlist_videos = search_result.videos
     
-        let dl_result = await downloader(playlist_videos, playlist_title)
+        let dl_result = await downloader(isThereLeft, playlist_videos, playlist_title, id, outputdir, move)
 
         await compressor(dl_result, move, outputdir)
 

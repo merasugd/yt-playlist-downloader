@@ -5,6 +5,7 @@ const search = require('yt-search')
 const ffmpeg = require('ffmpeg-static')
 const check_net = require('check-internet-connected')
 const request = require('request')
+const url = require('node:url')
 
 const prog = require('./progress')
 
@@ -17,6 +18,35 @@ module.exports.sanitizeTitle = function (title) {
 module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'config.json'), { encoding: 'utf-8' }))
 module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'download.json'), { encoding: 'utf-8' }))
 
+module.exports.fetchPlaylistID = function (inputUrl) {
+    const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]list=)|youtu\.be\/)([^"&?\/\s]{34})/;
+
+    const parsedUrl = url.parse(inputUrl, true);
+
+    if (parsedUrl.hostname === 'www.youtube.com' || parsedUrl.hostname === 'youtube.com') {
+        if (parsedUrl.pathname === '/playlist' || parsedUrl.pathname === '/watch') {
+            const playlistId = parsedUrl.query.list || parsedUrl.query.v;
+            return playlistId;
+        } else {
+            const match = inputUrl.match(regex);
+            if (match && match[1]) {
+                return match[1];
+            } else {
+                return inputUrl;
+            }
+        }
+    } else if (parsedUrl.hostname === 'youtu.be') {
+        const match = inputUrl.match(regex);
+        if (match && match[1]) {
+            return match[1];
+        } else {
+            return inputUrl;
+        }
+    } else {
+        return inputUrl;
+    }
+}
+
 module.exports.checkInternet = function (d) {
     return new Promise(async(resolve) => {
         if(!module.exports.config['internet_checking']) return resolve(true)
@@ -24,7 +54,7 @@ module.exports.checkInternet = function (d) {
         if(d) {
             prog.multipleProgress(d)
         } else {
-            prog.log('Checking internet...'.yellow)
+            prog.multipleProgress(['Checking Internet'.yellow])
         }
 
         check_net({ timeout: 10000, retries: 5, domain: "google.com" })

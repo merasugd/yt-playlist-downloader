@@ -53,6 +53,7 @@ module.exports.convertMp3 = function(inp, out) {
 module.exports.editSongMetadata = function(playlistTitle, url, raw_path, final_path, progressData, song_title) {
     return new Promise(async(resolve) => {
         prog.multipleProgress([
+            String(playlistTitle).green.bold,
             ("Downloading \""+song_title+'"').yellow,
             progressData,
             { total: 100, current: 98, label: 'converting to mp3' }
@@ -63,12 +64,14 @@ module.exports.editSongMetadata = function(playlistTitle, url, raw_path, final_p
         if(fs.existsSync(raw_path)) fs.rmSync(raw_path, { force: true })
 
         prog.multipleProgress([
+            String(playlistTitle).green.bold,
             ("Downloading \""+song_title+'"').yellow,
             progressData,
             { total: 100, current: 99, label: 'metadata' }
         ])
 
         let data = await util.searchYt(url, [
+            String(playlistTitle).green.bold,
             ("Downloading \""+song_title+'"').yellow,
             progressData,
             { total: 100, current: 99, label: 'checking internet'.yellow }
@@ -83,6 +86,7 @@ module.exports.editSongMetadata = function(playlistTitle, url, raw_path, final_p
             date: data.uploadDate.split('-')[0]
         }, {}, function(err) {
             prog.multipleProgress([
+                String(playlistTitle).green.bold,
                 ("Downloading \""+song_title+'"').yellow,
                 progressData,
                 { total: 100, current: 100, label: 'metadata' }
@@ -99,6 +103,7 @@ module.exports.editSongMetadata = function(playlistTitle, url, raw_path, final_p
 module.exports.editVideoMetadata = function(playlistTitle, video_title, progressData, url, video_path, nometadata) {
     return new Promise(async(resolve) => {
         let data = await util.searchYt(url, [
+            String(playlistTitle).green.bold,
             ("Downloading \""+video_title+'"').yellow,
             progressData,
             { total: 100, current: 99, label: 'checking internet'.yellow }

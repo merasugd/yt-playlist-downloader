@@ -5,10 +5,15 @@ const util = require('../utils/tools')
 
 module.exports = function(playlistId, data) {
     return new Promise(async(resolve) => {
-        prog.log(("Searching "+playlistId+'"').yellow)
+        prog.multipleProgress([
+            "Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green,
+            ("Searching "+playlistId+'"').yellow
+        ])
 
         let net = await util.checkInternet()
         if(!net) return process.exit(1)
+
+        playlistId = util.fetchPlaylistID(playlistId)
 
         let list = await yt({ listId: playlistId })
         
@@ -16,7 +21,10 @@ module.exports = function(playlistId, data) {
 
         let pl = list.title
 
-        prog.log(('Found "'+pl+'"').green)
+        prog.multipleProgress([
+            "Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green,
+            ('Found "'+pl+'"').green
+        ])
 
         let videos = list.videos.filter(v => v.title !== '[Private video]' || v.title !== '[Deleted video]').map((v, i) => {
             let settings = data.settings.find((vc) => vc.videoTitle === v.title || vc.videoId === v.videoId || vc.videoIndex === i+1)

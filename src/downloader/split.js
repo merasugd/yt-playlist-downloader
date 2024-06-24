@@ -7,9 +7,6 @@ const HttpsProxyAgent = require('https-proxy-agent')
 
 const cp = require('child_process')
 
-const root = path.join(__dirname, '..', '..')
-const pather = path.join(root, '.cache')
-
 const prog = require('../utils/progress')
 const util = require('../utils/tools')
 const media = require('../utils/media')
@@ -30,6 +27,12 @@ function download(playlistTitle, data, bin, progressData) {
     let dl_path = path.join(bin, dl_title+'.'+format)
 
     let nometadata = path.join(bin, dl_title+'.no_metadata.'+format)
+
+    if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
+    if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
+    if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
+    if(fs.existsSync(nometadata)) fs.rmSync(nometadata, { force: true })
+    if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
 
     let cookies = util.settings['cookie'] || ''
     let proxyServer = util.settings['proxy_server'] || ''
@@ -54,6 +57,7 @@ function download(playlistTitle, data, bin, progressData) {
         return new Promise(async(resolve) => {
             
             prog.multipleProgress([
+                String(playlistTitle).green.bold,
                 ("Downloading \""+dl_title+'"').yellow,
                 progressData,
                 { total: 100, current: 0, label: 'waiting' }
@@ -98,6 +102,7 @@ function download(playlistTitle, data, bin, progressData) {
                 current = last_current + Math.floor(parseInt(percent))
 
                 prog.multipleProgress([
+                    String(playlistTitle).green.bold,
                     ("Downloading \""+dl_title+'"').yellow,
                     progressData,
                     { total: 100, current: Math.floor((current / total_progress) * 100), label }
@@ -149,6 +154,7 @@ function download(playlistTitle, data, bin, progressData) {
                 })
 
                 prog.multipleProgress([
+                    String(playlistTitle).green.bold,
                     ("Downloading \""+dl_title+'"').yellow,
                     progressData,
                     { total: 100, current: Math.floor((current / total) * 100), label: 'merging' }
@@ -172,6 +178,7 @@ function download(playlistTitle, data, bin, progressData) {
                     if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
 
                     prog.multipleProgress([
+                        String(playlistTitle).green.bold,
                         ("Downloading \""+dl_title+'"').yellow,
                         progressData,
                         { total: 100, current: Math.floor((current / total) * 100), label: 'converting' }
@@ -184,6 +191,7 @@ function download(playlistTitle, data, bin, progressData) {
                     current = current + 1
 
                     prog.multipleProgress([
+                        String(playlistTitle).green.bold,
                         ("Downloading \""+dl_title+'"').yellow,
                         progressData,
                         { total: 100, current: Math.floor((current / total) * 100), label: 'metadata' }
@@ -221,63 +229,4 @@ function download(playlistTitle, data, bin, progressData) {
     })
 }
 
-function downloadLooper(arr, bin, pl, int) {
-    return new Promise(async(resolve) => {
-        let item = arr[int]
-
-        if(!item || arr.length <= int) return resolve(100)
-
-        let current = int+1
-        let total = arr.length
-
-        let net = await util.checkInternet([
-            ('Downloading "'+pl+'"').yellow,
-            { current, total, label: 'playlist' },
-            { total: 100, current: 0, label: 'checking internet'.yellow }
-        ])
-        if(!net) return process.exit(1)
-
-        prog.multipleProgress([
-            ('Downloading "'+pl+'"').yellow,
-            { current, total, label: 'playlist' },
-            { total: 100, current: 0, label: 'waiting' }
-        ])
-
-        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' })
-
-        if(dlResult !== 100) return resolve(101)
-
-        return resolve((await downloadLooper(arr, bin, pl, int+1)))
-    })
-}
-
-module.exports = function(arr, pl) {
-    return new Promise(async(resolve) => {
-        let playlist = path.join(pather, util.sanitizeTitle(String(pl))
-            .replaceAll(' ', '_')
-            .toLowerCase()
-        )
-
-        if(fs.existsSync(playlist)) {
-            fs.rmSync(playlist, { recursive: true, force: true })
-            fs.mkdirSync(playlist)
-        } else {
-            fs.mkdirSync(playlist)
-        }
-
-        let result = await downloadLooper(arr, playlist, pl, 0)
-
-        if(result !== 100) {
-            fs.rmdirSync(playlist, { recursive: true, force: true })
-            prog.log("Failed".red.bold)
-            return process.exit(1)     
-        }
-
-        prog.log('Downloaded Playlist "'+pl+'"')
-
-        return resolve({
-            path: playlist,
-            title: pl
-        })
-    })
-}
+module.exports = download
