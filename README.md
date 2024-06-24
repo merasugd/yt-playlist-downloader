@@ -39,7 +39,7 @@ v1.0.5
 - renamed bin to .cache
 
 v1.0.6
-- Added `safe_download`. If error has occurred it will save the current downloading playlist and you can continue downloading it when you run the program again. (Puts it in the `config.json` where it defaults to `true`.)
+- Added `safe_download`. If error has occurred or you close the program when not finished, You can continue downloading it when you run the program again. (Puts it in the `config.json` where it defaults to `true`.)
 - Made the logging centered.
 - You can now optionally put a youtube url that contains list in the query instead of playlist ID (Note: you can still put a playlist ID).
 - Made the downloader fixed.
