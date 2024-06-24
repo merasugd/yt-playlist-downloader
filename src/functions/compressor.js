@@ -61,7 +61,7 @@ function copyLooper(pl, files, output, source, total, int, d) {
             readStream.pipe(writeStream)
 
             writeStream.on("finish", async() => {
-                if(fs_s.existsSync(filePath)) await fs.rm(newFilePath, { recursive: true, force: true })
+                if(fs_s.existsSync(filePath)) await fs.rm(filePath, { recursive: true, force: true })
                  
                 return resolve((await copyLooper(pl, files, output, source, total, int+1, d)))
             })
