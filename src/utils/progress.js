@@ -80,7 +80,7 @@ module.exports.multipleProgress = (progressList = []) => {
         let { total, current, label } = v
         let size = tools.config['centered_logging'] && terminal ? Math.floor((terminal.length) - (total === 100 ? Math.floor(2 + String(current).length) : Math.floor(2 + Math.floor(String(total).length + String(current).length)))) : 40
 
-        const [bar] = createFilledBar(total, current, terminal.length >= 80 ? 80 : size);
+        const [bar] = createFilledBar(total, current, terminal.length >= 100 ? 100 : size);
 
         return tools.config['centered_logging'] && terminal ? (total === 100 ? `${bar} ${current}%\n${label}` : `${bar} ${current}/${total}\n${label}`) : `${bar} ${label} ${current}/${total}`
     }).filter(v => v !== 'not-bar')

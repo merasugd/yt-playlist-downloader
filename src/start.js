@@ -92,7 +92,7 @@ function prompt(plId, q, f, t, verMsg) {
             return resolve(await main(true, false, false, false, in_outputdir, in_move))
         }
 
-        let playlistId = plId || await prompter.question("Playlist ID: ")
+        let playlistId = plId || await prompter.question("Playlist: ")
 
         let quality = String(q || (await prompter.question("Quality (highest/lowest): "))).toLowerCase()
         if((quality === "highest" || quality === "lowest") === false) return resolve(await prompt(playlistId, q, f, t, verMsg))
