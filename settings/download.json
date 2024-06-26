@@ -2,11 +2,18 @@
     "cookie": "",
     "youtube_identity_token": "",
     "proxy_server": "",
+    "acrcloud": {
+        "host": "",
+        "api": {
+            "key": "",
+            "secret": ""
+        }
+    },
     "playlists": [
         {
             "playlistId": "PLqkwNLhKQzB9jqCtp2keXjeIOUCfyMtbZ",
             "quality": "highest",
-            "format": "mp3",
+            "format": "mp4",
             "settings": [
                 {
                     "videoId": "CR93vAnwF9U",

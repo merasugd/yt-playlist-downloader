@@ -40,7 +40,9 @@ function downloadLooper(arr, bin, pl, id, int) {
 
         manager.addDownloaded(id, item, int)
 
-        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' })
+        let index = String(int+1)
+
+        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' }, index)
 
         if(dlResult !== 100) return resolve(101)
 

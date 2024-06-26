@@ -11,7 +11,7 @@ const prog = require('../utils/progress')
 const util = require('../utils/tools')
 const media = require('../utils/media')
 
-function download(playlistTitle, data, bin, progressData) {
+function download(playlistTitle, data, bin, progressData, index) {
     let url = data.url;
     let title = data.title
 
@@ -27,11 +27,13 @@ function download(playlistTitle, data, bin, progressData) {
     let dl_path = path.join(bin, dl_title+'.'+format)
 
     let nometadata = path.join(bin, dl_title+'.no_metadata.'+format)
+    let cover_jpg = path.join(bin, 'cover.jpg')
 
     if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
     if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
     if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
     if(fs.existsSync(nometadata)) fs.rmSync(nometadata, { force: true })
+    if(fs.existsSync(cover_jpg)) fs.rmSync(nometadata, { force: true })
     if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
 
     let cookies = util.settings['cookie'] || ''
@@ -197,7 +199,7 @@ function download(playlistTitle, data, bin, progressData) {
                         { total: 100, current: Math.floor((current / total) * 100), label: 'metadata' }
                     ])
 
-                    await media.editVideoMetadata(playlistTitle, dl_title, progressData, url, dl_path, nometadata)
+                    await media.editVideoMetadata(playlistTitle, index, dl_title, progressData, url, dl_path, nometadata, cover_jpg)
 
                     current = current + 1
 
@@ -217,12 +219,13 @@ function download(playlistTitle, data, bin, progressData) {
         if(result === 100) {
             if(fs.existsSync(dl_audio_path) && format === 'mp3') {
                 await require('fs/promises').rename(dl_audio_path, dl_raw_path)
-                await media.editSongMetadata(playlistTitle, url, dl_raw_path, dl_path, progressData, dl_title)
+                await media.editSongMetadata(playlistTitle, index, url, dl_raw_path, dl_path, progressData, dl_title, cover_jpg)
             }
             
             if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
             if(fs.existsSync(dl_audio_path)) fs.rmSync(dl_audio_path, { force: true })
             if(fs.existsSync(dl_video_path)) fs.rmSync(dl_video_path, { force: true })
+            if(fs.existsSync(cover_jpg)) fs.rmSync(nometadata, { force: true })
         }
 
         return resolve(result)

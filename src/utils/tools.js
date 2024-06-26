@@ -130,9 +130,20 @@ module.exports.searchYt = function(uri, d) {
         let net = await module.exports.checkInternet(d)
         if(!net) return process.exit(1)
         
-        let data = await search({ videoId: uri.replaceAll('https://www.youtube.com/watch?v=', '') })
+        let data = (await search({ videoId: uri.replaceAll('https://www.youtube.com/watch?v=', '') }))
 
         return resolve(data)
+    })
+}
+
+module.exports.basicDL = function(uri, out) {
+    return new Promise(resolve => {
+        let stream = fs.createWriteStream(out)
+
+        request(uri).pipe(stream)
+
+        stream.on('finish', () => { resolve(100) })
+        stream.on('error', () => { resolve(101) })
     })
 }
 
@@ -144,4 +155,21 @@ module.exports.boolean = function(bool) {
     }
     
     return false
+}
+
+module.exports.acrcloud = function() {
+    let allow = module.exports.config['music_metadata']
+    let arcSettings = module.exports.settings['acrcloud']
+
+    if(!allow) return false
+    if(!arcSettings) return false
+    if(!arcSettings.host) return false
+    if(arcSettings.host === '' && arcSettings.host.startsWith(' ')) return false
+    if(!arcSettings.api) return false
+    if(typeof arcSettings.api.key !== 'string') return false
+    if(typeof arcSettings.api.secret !== 'string') return false
+    if(arcSettings.api.key === '' && arcSettings.api.key.startsWith(' ')) return false
+    if(arcSettings.api.secret === '' && arcSettings.api.secret.startsWith(' ')) return false
+
+    return arcSettings
 }

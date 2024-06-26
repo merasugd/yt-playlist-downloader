@@ -27,7 +27,9 @@ const downloader = require('./downloader/main')
 `)
 if(!fs.existsSync(path.join(__dirname, "cookies.txt"))) fs.writeFileSync(path.join(__dirname, "cookies.txt"), '')*/
 
-if(!fs.existsSync(path.join(__dirname, '..', '..', '.cache'))) fs.mkdirSync(path.join(__dirname, '..', '..', '.cache'))
+if(!fs.existsSync(path.join(__dirname, '..', '.cache'))) fs.mkdirSync(path.join(__dirname, '..', '.cache'))
+
+fs.readdirSync(path.join(__dirname, '..', '.cache')).filter(v => v.startsWith('temp-')).map(v => { return path.join(__dirname, '..', '.cache', v) }).forEach(l => { return fs.rmSync(l, { force: true })} )
 
 let listofplaylist = (util.settings['playlists'] || []).map(v => {
     if(typeof v !== 'object') return 'not-valid'

@@ -8,7 +8,7 @@ const prog = require('../utils/progress')
 const util = require('../utils/tools')
 const media = require('../utils/media')
 
-function download(playlistTitle, data, bin, progressData) {
+function download(playlistTitle, data, bin, progressData, index) {
     let url = data.url;
     let title = data.title
 
@@ -22,10 +22,12 @@ function download(playlistTitle, data, bin, progressData) {
     let dl_path = path.join(bin, dl_title+'.'+format)
 
     let nometadata = path.join(bin, dl_title+'.no_metadata.'+format)
+    let cover_jpg = path.join(bin, 'cover.jpg')
 
     if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
     if(fs.existsSync(nometadata)) fs.rmSync(dl_video_path, { force: true })
     if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
+    if(fs.existsSync(cover_jpg)) fs.rmSync(nometadata, { force: true })
 
     let cookies = util.settings['cookie'] || ''
     let proxyServer = util.settings['proxy_server'] || ''
@@ -87,7 +89,7 @@ function download(playlistTitle, data, bin, progressData) {
                     { total: 100, current: Math.floor((current / 102) * 100), label: "metadata" }
                 ])
 
-                let r = await media.editVideoMetadata(playlistTitle, dl_title, progressData, uri, dl_path, nometadata)
+                let r = await media.editVideoMetadata(playlistTitle, index, dl_title, progressData, uri, dl_path, nometadata, cover_jpg)
                 current = current + 1
 
                 prog.multipleProgress([
@@ -104,7 +106,7 @@ function download(playlistTitle, data, bin, progressData) {
             let audioStream = fs.createWriteStream(dl_raw_path)
             await pipeStream(audio, audioStream, "downloading")
 
-            let result = await media.editSongMetadata(playlistTitle, uri, dl_raw_path, dl_path, progressData, dl_title)
+            let result = await media.editSongMetadata(playlistTitle, index, uri, dl_raw_path, dl_path, progressData, dl_title, cover_jpg)
 
             return resolve(result)
         })
@@ -149,7 +151,13 @@ function download(playlistTitle, data, bin, progressData) {
     }
 
     return new Promise(async(resolve) => {
-        return resolve(await dl(url))
+        let result = await dl(url)
+
+        if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
+        if(fs.existsSync(nometadata)) fs.rmSync(dl_video_path, { force: true })
+        if(fs.existsSync(cover_jpg)) fs.rmSync(nometadata, { force: true })
+
+        return resolve(result)
     })
 }
 

@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.6**
+**v1.0.7-pre**
 
 older versions can be downloaded thru releases
 
@@ -68,6 +68,11 @@ v1.0.6-pre
 - Prompt is cleaner.
 - Fixed `version checking`.
 
+v1.0.7-pre
+- Added proper metadata to mp3 (option in `config.json` as `music_metadata` which defaults to false and needs `acrcloud host, api key and secret` in the `download.json`).
+- Proper video thumbnails.
+- Added song cover for mp3.
+
 ## Note
 - The internet check might contribute to slowness. (it depends to your net).
 - This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
@@ -75,6 +80,7 @@ v1.0.6-pre
 
 ## Requires
 - [FFmpeg](https://ffmpeg.org/)
+- [MP3Tag](https://www.mp3tag.de/en/)
 - [Node.js 20+](https://nodejs.org/en)
 
 ## Installation
