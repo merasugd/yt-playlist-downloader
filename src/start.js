@@ -29,7 +29,7 @@ if(!fs.existsSync(path.join(__dirname, "cookies.txt"))) fs.writeFileSync(path.jo
 
 if(!fs.existsSync(path.join(__dirname, '..', '.cache'))) fs.mkdirSync(path.join(__dirname, '..', '.cache'))
 
-fs.readdirSync(path.join(__dirname, '..', '.cache')).filter(v => v !== 'lock.json').map(v => { return path.join(__dirname, '..', '.cache', v) }).forEach(l => { return fs.rmSync(l, { recursive: true, force: true })} )
+fs.readdirSync(path.join(__dirname, '..', '.cache')).filter(v => v.startsWith('temp-')).map(v => { return path.join(__dirname, '..', '.cache', v) }).forEach(l => { return fs.rmSync(l, { force: true })} )
 
 let listofplaylist = (util.settings['playlists'] || []).map(v => {
     if(typeof v !== 'object') return 'not-valid'
