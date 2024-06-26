@@ -34,3 +34,13 @@
 ![cookie](https://raw.githubusercontent.com/merasugd/yt-playlist-downloader/main/wiki/youtube_token.png)
 
 # How to get YouTube Identity Token
+
+## Step 1
+- Open sources tab and click whats pointed.
+- Then click CTRL and F in your keyboard
+- A search bar will show up and put there "ID_TOKEN"
+
+![step1](https://raw.githubusercontent.com/merasugd/yt-playlist-downloader/main/wiki/step7.png)
+
+## You got your YouTube Identity Token
+1[token]()
