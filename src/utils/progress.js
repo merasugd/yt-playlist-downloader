@@ -59,7 +59,7 @@ const centerify = (text, only_width) => {
 
 module.exports.log = (message, progress) => {
     console.clear();
-    console.log(progress ? message : centerify(message, true));
+    console.log(tools.config['centered_logging'] ? (progress ? message : centerify(message, true)) : message);
 }
 
 module.exports.progress = (current, total, label = '') => {
