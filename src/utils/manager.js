@@ -102,3 +102,25 @@ module.exports.left = function() {
         return module.exports.get(v)
     })
 }
+
+module.exports.is_completed = function(out, pl) {
+    let final = path.join(out, pl.playlist)
+
+    if(!fs.existsSync(final)) return false
+
+    let files = fs.readdirSync(final)
+
+    if(files.length > pl.videos.length) return false
+
+    let filtered = files.map((v) => {
+        let got = pl.videos.find(vl => vl.title+'.'+vl.format === v)
+        if(!got) return { bool: true }
+
+        let searched = got.title+'.'+got.format
+        let downloaded = v
+
+       return { bool: searched === downloaded, data: [searched, downloaded] }
+    }).filter(v => v.bool !== true)
+
+    return filtered.length < 1
+}

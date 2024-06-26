@@ -29,7 +29,7 @@ if(!fs.existsSync(path.join(__dirname, "cookies.txt"))) fs.writeFileSync(path.jo
 
 if(!fs.existsSync(path.join(__dirname, '..', '.cache'))) fs.mkdirSync(path.join(__dirname, '..', '.cache'))
 
-fs.readdirSync(path.join(__dirname, '..', '.cache')).filter(v => v.startsWith('temp-')).map(v => { return path.join(__dirname, '..', '.cache', v) }).forEach(l => { return fs.rmSync(l, { force: true })} )
+fs.readdirSync(path.join(__dirname, '..', '.cache')).filter(v => v !== 'lock.json').map(v => { return path.join(__dirname, '..', '.cache', v) }).forEach(l => { return fs.rmSync(l, { recursive: true, force: true })} )
 
 let listofplaylist = (util.settings['playlists'] || []).map(v => {
     if(typeof v !== 'object') return 'not-valid'
@@ -281,6 +281,12 @@ function main(inner, id, quality, format, outputdir, move, settings, isThereLeft
 
         let playlist_title = search_result.playlist
         let playlist_videos = search_result.videos
+
+        if(manager.is_completed(outputdir, search_result)) {
+            prog.log(`Skipping '${playlist_title}. It is already downloaded.`.yellow)
+            await wait(2000)
+            return resolve(100)
+        }
     
         let dl_result = await downloader(isThereLeft, playlist_videos, playlist_title, id, outputdir, move)
 
@@ -289,5 +295,9 @@ function main(inner, id, quality, format, outputdir, move, settings, isThereLeft
         return resolve(100)
     })
 }
+
+function wait(ms) {
+    return new Promise(resolve => { setTimeout(() => { return resolve() }, ms || 1000)})
+} 
 
 module.exports = main

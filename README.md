@@ -39,7 +39,7 @@ v1.0.5
 - renamed bin to .cache
 
 v1.0.6
-- Added `safe_download`. If error has occurred or you close the program when not finished, You can continue downloading it when you run the program again. (Puts it in the `config.json` where it defaults to `true`.)
+- Added `sownlafe_doad`. If error has occurred or you close the program when not finished, You can continue downloading it when you run the program again. (Puts it in the `config.json` where it defaults to `true`.)
 - Made the logging centered.
 - You can now optionally put a youtube url that contains list in the query instead of playlist ID (Note: you can still put a playlist ID).
 - Made the downloader fixed.
@@ -72,6 +72,8 @@ v1.0.7-pre
 - Added proper metadata to mp3 (option in `config.json` as `music_metadata` which defaults to false and needs `acrcloud host, api key and secret` in the `download.json`).
 - Proper video thumbnails.
 - Added song cover for mp3.
+- `split-download` defaults to `false` again.
+- Skips downloaded playlist if same output path.
 
 ## Note
 - The internet check might contribute to slowness. (it depends to your net).
@@ -80,7 +82,6 @@ v1.0.7-pre
 
 ## Requires
 - [FFmpeg](https://ffmpeg.org/)
-- [MP3Tag](https://www.mp3tag.de/en/)
 - [Node.js 20+](https://nodejs.org/en)
 
 ## Installation

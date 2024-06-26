@@ -1,8 +1,8 @@
 {
-    "split_download": true,
     "safe_download": true,
     "internet_checking": true,
     "centered_logging": true,
+    "split_download": false,
     "music_metadata": false,
     "use_youtube_cookies": false,
     "use_proxy": false
