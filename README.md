@@ -72,7 +72,7 @@ v1.0.7-pre
 - Added proper metadata to mp3 (option in `config.json` as `music_metadata` which defaults to false and needs `acrcloud host, api key and secret` in the `download.json`).
 - Proper video thumbnails.
 - Added song cover for mp3.
-- `split-download` defaults to `false` again.
+- `split_download` defaults to `false` again.
 - Skips downloaded playlist if same output path.
 
 ## Note
