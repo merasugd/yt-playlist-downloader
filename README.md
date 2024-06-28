@@ -83,8 +83,8 @@ v1.0.7-pre
 - Skips downloaded playlist if same output path.
 
 ## Note
-- When downloading formats other than mp4/mp3. It might contribute to slowness since we convert to mp4/mp3 first before the format.
-- The internet check might contribute to slowness. (it depends on your net).
+- When downloading formats other than mp4/mp3. It might contribute to slowness since it converts to mp4/mp3 first before converting to format.
+- The internet check might contribute to slowness. (it depends on your net, you can turn it off in the config).
 - This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
 - The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because one-download quality is sh#t.
 
@@ -112,8 +112,6 @@ v1.0.7-pre
 - **Simple Download**: Easy to use for downloading YouTube content.
 - **Compression**: Option to compress downloads into a zip file or move them to a directory.
 - **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.
-- **Fast Download**: Fast download with Split Downloader V2.
-
 
 ## Support
 
