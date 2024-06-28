@@ -142,13 +142,12 @@ module.exports.qualityCheck = function(input, list) {
         'highest',
         'medium',
         'lowest'
-    ]
+    ].filter(v => !module.exports.config['split_download_v2'] && v !== 'medium')
 
     if(list) return quality.join('/')
 
     if(quality.find(v => v === input)) return true
-    if(input === 'medium') return module.exports.config['split_download_v2'] ? 'medium' : 'highest'
-
+    
     return false
 }
 
