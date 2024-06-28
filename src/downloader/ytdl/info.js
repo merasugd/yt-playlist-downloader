@@ -33,7 +33,7 @@ module.exports = function(vidId) {
         'User-Agent': 'com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)',
         'content-type': 'application/json',
         'Cookie': cookies,
-        'x-youtube-identity-token': ytId
+        'X-YouTube-Identity-Token': ytId
     } : {
         'X-YouTube-Client-Name': '5',
         'X-YouTube-Client-Version': '19.09.3',
