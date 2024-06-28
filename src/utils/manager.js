@@ -114,7 +114,7 @@ module.exports.is_completed = function(out, pl) {
 
     let filtered = files.map((v) => {
         let got = pl.videos.find(vl => vl.title+'.'+vl.format === v)
-        if(!got) return { bool: true }
+        if(!got) return { bool: false }
 
         let searched = got.title+'.'+got.format
         let downloaded = v
