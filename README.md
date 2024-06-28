@@ -50,7 +50,7 @@ v1.0.7
 - Added support for other formats. (flv/mkv/wav/ogg)
 - Added video support.
 - Cleaned the code a little.
-- Added medium for quality. (only for `split_download_v2`)
+- Added medium for quality. (only in `split_download_v2`)
 
 ## Pre-Releases
 v1.0.3-pre
@@ -84,7 +84,7 @@ v1.0.7-pre
 
 ## Note
 - When downloading formats other than mp4/mp3. It might contribute to slowness since we convert to mp4/mp3 first before the format.
-- The internet check might contribute to slowness. (it depends to your net).
+- The internet check might contribute to slowness. (it depends on your net).
 - This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
 - The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because one-download quality is sh#t.
 
