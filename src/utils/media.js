@@ -91,7 +91,7 @@ module.exports.cut = function(inp) {
     return new Promise(async(resolve) => {
         let final = path.join(__dirname, '..', '..', '.cache', 'temp-'+uuid()+'.mp3')
 
-        let dur = await getAudioDurationInSeconds(final, ffprobe)
+        let dur = await getAudioDurationInSeconds(inp, ffprobe)
         if(dur < 30) return resolve(101)
 
         let proc = cp.spawn(ffmpeg, [
