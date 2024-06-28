@@ -23,8 +23,8 @@ if(util.config['use_proxy_server']) {
 
 module.exports = function(vidId) {
     let api = ytdlApi
-    let cookies = typeof cookie === 'object' ? cookie.cookie : null
-    let ytId = typeof cookie === 'object' ? cookie.ytId : null
+    let cookies = cookie && typeof cookie === 'object' ? cookie.cookie : null
+    let ytId = cookie && typeof cookie === 'object' ? cookie.ytId : null
 
     let headers = cookies && ytId ? {
         'X-YouTube-Client-Name': '5',
