@@ -112,6 +112,7 @@ v1.0.7-pre
 - **Simple Download**: Easy to use for downloading YouTube content.
 - **Compression**: Option to compress downloads into a zip file or move them to a directory.
 - **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.
+- **Fast Download**: Fast download with Split Downloader V2.
 
 
 ## Support
