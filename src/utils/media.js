@@ -3,7 +3,9 @@ const path = require('path')
 const fsp = require('fs/promises')
 const metadata = require('ffmetadata')
 const ffmpeg = require('ffmpeg-static')
+const ffprobe = require('ffprobe-static').path
 const cp = require('child_process')
+const { getAudioDurationInSeconds } = require('get-audio-duration')
 const uuid = require('uuid').v4
 
 const prog = require('./progress')
@@ -12,12 +14,9 @@ const song = require('./song')
 
 metadata.setFfmpegPath(ffmpeg)
 
-module.exports.convertMp4 = function(inp, out) {
+module.exports.ffmpeg = function(args) {
     return new Promise(async(resolve) => {
-        let proc = cp.spawn(ffmpeg, [
-            '-i', inp,
-            '-c:v', 'copy', out
-        ], {
+        let proc = cp.spawn(ffmpeg, args, {
             windowsHide: true
         })    
 
@@ -29,6 +28,41 @@ module.exports.convertMp4 = function(inp, out) {
         proc.on('close', async() => { 
             return resolve(100)
         })
+    })
+}
+
+module.exports.convertMp4 = function(inp, out) {
+    return new Promise(async(resolve) => {
+        let proc = cp.spawn(ffmpeg, [
+            '-i', inp,
+            '-c:v', 'copy', out
+        ], {
+            windowsHide: true
+        })    
+
+        proc.on('error', (err) => {
+            console.log(String(err).red)
+            return resolve(101)
+        })
+
+        proc.on('close', async() => { 
+            return resolve(100)
+        })
+    })
+}
+module.exports.convert = function(inp, out, fom) {
+    return new Promise(async(resolve) => {
+        let result = await module.exports.ffmpeg(util.formatCheck(fom, inp, out, true))
+
+        if(result === 100) {
+            if(fs.existsSync(inp)) fs.rmSync(inp, { force: true })
+            
+            return resolve(result)
+        } else {
+            if(fs.existsSync(out)) fs.rmSync(out, { force: true })
+            
+            return resolve(101)
+        }
     })
 }
 
@@ -57,9 +91,13 @@ module.exports.cut = function(inp) {
     return new Promise(async(resolve) => {
         let final = path.join(__dirname, '..', '..', '.cache', 'temp-'+uuid()+'.mp3')
 
+        let dur = await getAudioDurationInSeconds(final, ffprobe)
+        if(dur < 30) return resolve(101)
+
         let proc = cp.spawn(ffmpeg, [
             '-i', inp,
-            '-t', '20', final
+            '-ss', '10',
+            '-t', '10', final
         ], {
             windowsHide: true
         })    
@@ -75,7 +113,7 @@ module.exports.cut = function(inp) {
     })
 }
 
-module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, final_path, progressData, song_title, cover) {
+module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, final_path, progressData, song_title, cover, final_format, final_dl_path) {
     return new Promise(async(resolve) => {
         prog.multipleProgress([
             String(playlistTitle).green.bold,
@@ -137,13 +175,26 @@ module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, 
             if(fs.existsSync(raw_path)) fs.rmSync(raw_path, { force: true })
             if(fs.existsSync(cover)) fs.rmSync(cover, { force: true })
 
+            if(!final_path.endsWith(final_format)) {
+                prog.multipleProgress([
+                    String(playlistTitle).green.bold,
+                    ("Downloading \""+song_title+'"').yellow,
+                    progressData,
+                    { total: 100, current: 100, label: 'converting to '+final_format }
+                ])
+
+                let res = await module.exports.convert(final_path, final_dl_path, final_format)
+
+                return resolve(res)
+            }
+
             if(err) return resolve(101)
             return resolve(100)
         })
     })
 }
 
-module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, progressData, url, video_path, nometadata, cover) {
+module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, progressData, url, video_path, nometadata, cover, final_format, final_dl_path) {
     return new Promise(async(resolve) => {
         let data = await util.searchYt(url, [
             String(playlistTitle).green.bold,
@@ -196,6 +247,19 @@ module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, prog
         proc.on('close', async() => { 
             if(fs.existsSync(nometadata)) await fsp.rm(nometadata, { force: true })
             if(fs.existsSync(cover)) fs.rmSync(cover, { force: true })
+
+            if(!video_path.endsWith(final_format)) {
+                prog.multipleProgress([
+                    String(playlistTitle).green.bold,
+                    ("Downloading \""+video_title+'"').yellow,
+                    progressData,
+                    { total: 100, current: 100, label: 'converting to '+final_format }
+                ])
+
+                let res = await module.exports.convert(video_path, final_dl_path, final_format)
+    
+                return resolve(res)
+            }
 
             return resolve(100)
         })

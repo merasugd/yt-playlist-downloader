@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.7-pre**
+**v1.0.7**
 
 older versions can be downloaded thru releases
 
@@ -45,6 +45,13 @@ v1.0.6
 - Made the downloader fixed.
 - Storage optimization for moving the files.
 
+v1.0.7
+- New split downloader V2. (`split_download` must be false and `split_download_v2` defaults to `true`) (Note: this is currently in beta and also because of the ytdl-core 403 error, I plan to use yt-dlp in the future)
+- Added support for other formats. (flv/mkv/wav/ogg)
+- Added video support.
+- Cleaned the code a little.
+- Added medium for quality. (only for `split_download_v2`)
+
 ## Pre-Releases
 v1.0.3-pre
 - Removed **Split Download and Merging**
@@ -76,6 +83,7 @@ v1.0.7-pre
 - Skips downloaded playlist if same output path.
 
 ## Note
+- When downloading formats other than mp4/mp3. It might contribute to slowness since we convert to mp4/mp3 first before the format.
 - The internet check might contribute to slowness. (it depends to your net).
 - This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
 - The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because one-download quality is sh#t.

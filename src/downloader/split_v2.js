@@ -1,4 +1,3 @@
-const ytdl = require('ytdl-core');
 const fs = require('fs');
 const path = require('path');
 const colors = require('colors');
@@ -9,7 +8,8 @@ const cp = require('child_process')
 
 const prog = require('../utils/progress')
 const util = require('../utils/tools')
-const media = require('../utils/media');
+const media = require('../utils/media')
+const downloader = require('./ytdl/download')
 
 function download(playlistTitle, data, bin, progressData, index) {
     let url = data.url;
@@ -24,7 +24,7 @@ function download(playlistTitle, data, bin, progressData, index) {
 
     let dl_audio_path = path.join(bin, raw_title+".audio."+'webm')
     let dl_video_path = path.join(bin, raw_title+".video."+'webm')
-    let dl_raw_path = path.join(bin, raw_title+".mkv")
+    let dl_raw_path = path.join(bin, raw_title+".raw."+'mkv')
     let dl_path = path.join(bin, dl_title+'.'+format)
     let dl_final_path = path.join(bin, dl_title+'.'+final_format)
 
@@ -58,7 +58,7 @@ function download(playlistTitle, data, bin, progressData, index) {
     let last_current = 0
 
 
-    function dl(uri, q, f) {
+    function dl(uri) {
         return new Promise(async(resolve) => {
             
             prog.multipleProgress([
@@ -68,84 +68,55 @@ function download(playlistTitle, data, bin, progressData, index) {
                 { total: 100, current: 0, label: 'waiting' }
             ])
 
-            if(f) {
-                let fullOptions = Object.assign(dlOptions, { quality: q || quality, filter: 'videoandaudio' })
-                let pipeOptF = { uri, opt: fullOptions }
-                let full = ytdl(uri, fullOptions)
-                let fullStream = fs.createWriteStream(dl_path)
-
-                let res_f = await pipeStream(full, fullStream, pipeOptF, "downloading", q || quality, '', 0)
-                if(res_f !== 100) return resolve(res_f)
-
-                let r = await encode(uri, q, f)
-
-                return resolve(r)
-            }
-
-            let audio = ytdl(uri, Object.assign(dlOptions, { quality: (q || quality)+'audio', filter: 'audioonly' }))
-            let audioStream = fs.createWriteStream(dl_audio_path)
-
-            let res_a = await pipeStream(audio, audioStream, "audio")
-            if(res_a !== 100) return resolve(res_a)
+            let res_audio = await progressStream(uri, dl_audio_path, 'audio')
+            if(res_audio !== 100) return resolve(res_audio)
 
             if(format === 'mp3') return resolve(100)
 
-            let video = ytdl(uri, Object.assign(dlOptions, { quality: (q || quality)+'video', filter: 'videoonly' }))
-            let videoStream = fs.createWriteStream(dl_video_path)
+            let res_video = await progressStream(uri, dl_video_path, "video")
+            if(res_video !== 100) return resolve(res_video)
 
-            let res_v = await pipeStream(video, videoStream, "video")
-            if(res_v !== 100) return resolve(res_v)
-
-            let result = await encode(uri, q, f)
+            let result = await encode()
             return resolve(result)
         })
     }
 
-    function pipeStream(src, dest, label) {
-        return new Promise((resolve) => {
-            src.pipe(dest)
+    function progressStream(uri, pathage, label) {
+        return new Promise(async(resolve) => {
+            let res = await downloader(uri, {
+                format: label,
+                quality: quality,
+                output_path: pathage
+            }, (event, data) => {
+                if(event === 'progress') {
+                    const percent = data.percentage
+                    const total_progress = label === "video and audio" ? 100 : (format === 'mp3' ? 102 : total)
+    
+                    current = last_current + Math.floor(parseInt(percent))
+
+                    prog.multipleProgress([
+                        String(playlistTitle).green.bold,
+                        ("Downloading \""+dl_title+'"').yellow,
+                        progressData,
+                        { total: 100, current: Math.floor((current / total_progress) * 100), label, speed: data.speed.string }
+                    ])
+                } else if(event === 'error') {
+                    prog.log(String(data).red)
+                    return resolve(101)
+                }
+            })
             
-            src.on("progress", (_, downloaded, size) => {
-                const percent = ((downloaded / size) * 100).toFixed(2);
-                const total_progress = label === "video and audio" ? 100 : (format === 'mp3' ? 102 : total)
-    
-                current = last_current + Math.floor(parseInt(percent))
+            if(res.status !== 'SUCCESS') return resolve(101)
 
-                prog.multipleProgress([
-                    String(playlistTitle).green.bold,
-                    ("Downloading \""+dl_title+'"').yellow,
-                    progressData,
-                    { total: 100, current: Math.floor((current / total_progress) * 100), label }
-                ])
-            });
-    
-            src.on('finish', () => {
-                resolve(100)
+            last_current = last_current + 100
 
-                last_current = current
-            })
-    
-            src.on('error', (err) => {
-                prog.log(String(err).red)
-                resolve(101)
-            })
+            return resolve(100)
         })
     }
 
-    function encode(prev_uri, q, f) {
+    function encode() {
         function merge(video, audio) {
             return new Promise(async(resolve) => {
-                if(f && fs.existsSync(dl_path) || f && fs.existsSync(dl_raw_path)) return resolve(100)
-
-                if(q === 'lowest' && f && !fs.existsSync(dl_raw_path)) {
-                    prog.log("Fsiled".red.bold)
-                    return process.exit(1)
-                }
-
-                if(!q && f && !fs.existsSync(dl_raw_path)) return resolve(await dl(prev_uri, 'lowest', true))
-                if(q && !f && !fs.existsSync(dl_raw_path)) return resolve(await dl(prev_uri, undefined, true))
-                if(!fs.existsSync(audio) || !fs.existsSync(video)) return resolve(await dl(prev_uri, 'lowest'))
-
                 let audioStream = fs.createReadStream(audio)
                 let videoStream = fs.createReadStream(video)
 
@@ -191,7 +162,7 @@ function download(playlistTitle, data, bin, progressData, index) {
                         String(playlistTitle).green.bold,
                         ("Downloading \""+dl_title+'"').yellow,
                         progressData,
-                        { total: 100, current: Math.floor((current / total) * 100), label: 'converting' }
+                        { total: 100, current: Math.floor((current / total) * 100), label: 'converting to mp4' }
                     ])
 
                     await media.convertMp4(dl_raw_path, dl_path)

@@ -47,6 +47,111 @@ module.exports.fetchPlaylistID = function (inputUrl) {
     }
 }
 
+module.exports.fetchId = function(input) {
+    let videoIdPattern = /^[a-zA-Z0-9_-]{11}$/;
+    let playlistIdPattern = /^(PL|UU|LL|FL)[a-zA-Z0-9_-]{32}$/;
+  
+    if (videoIdPattern.test(input)) {
+        return 'video';
+    } else if (playlistIdPattern.test(input)) {
+        return 'playlist';
+    } else {
+        return 'unknown';
+    }
+}
+
+module.exports.formatCheck = function(input, list, defaultf, ffmpeg_args) {
+    let formats = [
+        'mp3',
+        'ogg',
+        'wav',
+        'mp4',
+        'mkv',
+        'flv'
+    ]
+    let audio_formats = [
+        'ogg',
+        'mp3',
+        'wav'
+    ]
+    let video_formats = [
+        'mkv',
+        'mp4',
+        'flv'
+    ]
+    let found = formats.find(v => v === input)
+
+    if(ffmpeg_args) {
+        if(input === 'mkv') return [
+            '-i', list,
+            '-map', '0:0', '-map', '0:1',
+            '-c', 'copy',
+            '-id3v2_version', '3',
+            '-metadata:s:v', 'title=Album cover',
+            '-metadata:s:v', 'comment=Cover (front)',
+            defaultf
+        ]
+        if(input === 'flv') return [
+            '-i', list,
+            '-pass', '1',
+            '-vcodec', 'libx264', '-preset', 'slower',
+            '-b', '512k', '-bt', '512k',
+            '-threads', '0',
+            '-s', '640x360', '-aspect', '16:9',
+            '-acodec', 'libmp3lame',
+            '-ar', '44100', '-ab', '32',
+            '-f', 'flv', '-y',
+            defaultf
+        ]
+
+        if(input === 'ogg') return [
+            '-i', list,
+            '-c:a', 'libvorbis',
+            '-q:a', '5',
+            defaultf
+        ]
+        if(input === 'wav') return [
+            '-i', list,
+            defaultf
+        ]
+
+        return [
+            '-i', list,
+            defaultf
+        ]
+    }
+
+    if(defaultf && found) {
+        if(audio_formats.find(va => va === found)) return 'mp3'
+        if(video_formats.find(vv => vv === found)) return 'mp4'
+    } else if(defaultf && !found) return 'mp4'
+
+    if(list) return formats.join('/')
+
+    if(found) return true
+
+    return false
+}
+
+module.exports.pathCheck = function(input) {
+    return input && input === "" || input.startsWith(" ") || input.startsWith('"') || input.endsWith('"') || !fs.existsSync(input) || !(fs.statSync(input).isDirectory())
+}
+
+module.exports.qualityCheck = function(input, list) {
+    let quality = [
+        'highest',
+        'medium',
+        'lowest'
+    ]
+
+    if(list) return quality.join('/')
+
+    if(quality.find(v => v === input)) return true
+    if(input === 'medium') return module.exports.config['split_download_v2'] ? 'medium' : 'highest'
+
+    return false
+}
+
 module.exports.checkInternet = function (d) {
     return new Promise(async(resolve) => {
         if(!module.exports.config['internet_checking']) return resolve(true)
@@ -172,4 +277,8 @@ module.exports.acrcloud = function() {
     if(arcSettings.api.secret === '' && arcSettings.api.secret.startsWith(' ')) return false
 
     return arcSettings
+}
+
+module.exports.wait = function(ms) {
+    return new Promise(resolve => { setTimeout(() => { return resolve() }, ms || 1000) })
 }

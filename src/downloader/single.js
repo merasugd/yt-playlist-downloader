@@ -12,7 +12,8 @@ function download(playlistTitle, data, bin, progressData, index) {
     let url = data.url;
     let title = data.title
 
-    let format = (data.format || 'mp4')
+    let format = util.formatCheck(data.format, false, true)
+    let final_format = data.format || 'mp4'
     let quality = data.quality || 'highest'
 
     let dl_title = util.sanitizeTitle(title)
@@ -20,6 +21,7 @@ function download(playlistTitle, data, bin, progressData, index) {
 
     let dl_raw_path = path.join(bin, raw_title+".webm")
     let dl_path = path.join(bin, dl_title+'.'+format)
+    let dl_final_path = path.join(bin, dl_title+'.'+final_format)
 
     let nometadata = path.join(bin, dl_title+'.no_metadata.'+format)
     let cover_jpg = path.join(bin, 'cover.jpg')
@@ -27,7 +29,8 @@ function download(playlistTitle, data, bin, progressData, index) {
     if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
     if(fs.existsSync(nometadata)) fs.rmSync(dl_video_path, { force: true })
     if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
-    if(fs.existsSync(cover_jpg)) fs.rmSync(nometadata, { force: true })
+    if(fs.existsSync(cover_jpg)) fs.rmSync(cover_jpg, { force: true })
+    if(fs.existsSync(dl_final_path)) fs.rmSync(dl_final_path, { force: true })
 
     let cookies = util.settings['cookie'] || ''
     let proxyServer = util.settings['proxy_server'] || ''
@@ -59,10 +62,12 @@ function download(playlistTitle, data, bin, progressData, index) {
             ])
 
             if(format === 'mp4') {
-                let full = ytdl(uri, Object.assign(dlOptions, { quality: q || quality, filter: 'videoandaudio' }))
+                let fullOptions = Object.assign(dlOptions, { quality: q || quality, filter: 'videoandaudio' })
+                let full = ytdl(uri, fullOptions)
                 let fullStream = fs.createWriteStream(dl_raw_path)
 
-                await pipeStream(full, fullStream, "downloading")
+                let res_f = await pipeStream(full, fullStream, "downloading")
+                if(res_f !== 100) return resolve(res_f)
 
                 prog.multipleProgress([
                     String(playlistTitle).green.bold,
@@ -89,7 +94,7 @@ function download(playlistTitle, data, bin, progressData, index) {
                     { total: 100, current: Math.floor((current / 102) * 100), label: "metadata" }
                 ])
 
-                let r = await media.editVideoMetadata(playlistTitle, index, dl_title, progressData, uri, dl_path, nometadata, cover_jpg)
+                let r = await media.editVideoMetadata(playlistTitle, index, dl_title, progressData, uri, dl_path, nometadata, cover_jpg, final_format, dl_final_path)
                 current = current + 1
 
                 prog.multipleProgress([
@@ -102,11 +107,14 @@ function download(playlistTitle, data, bin, progressData, index) {
                 return resolve(r)
             }
 
-            let audio = ytdl(uri, Object.assign(dlOptions, { quality: (q || quality)+'audio', filter: 'audioonly' }))
+            let audioOptions = Object.assign(dlOptions, { quality: (q || quality)+'audio', filter: 'audioonly' })
+            let audio = ytdl(uri, audioOptions)
             let audioStream = fs.createWriteStream(dl_raw_path)
-            await pipeStream(audio, audioStream, "downloading")
 
-            let result = await media.editSongMetadata(playlistTitle, index, uri, dl_raw_path, dl_path, progressData, dl_title, cover_jpg)
+            let res_a = await pipeStream(audio, audioStream, "downloading")
+            if(res_a !== 100) return resolve(res_a)
+
+            let result = await media.editSongMetadata(playlistTitle, index, uri, dl_raw_path, dl_path, progressData, dl_title, cover_jpg, final_format, dl_final_path)
 
             return resolve(result)
         })
@@ -114,18 +122,11 @@ function download(playlistTitle, data, bin, progressData, index) {
 
     function pipeStream(src, dest, label) {
         return new Promise((resolve) => {
-            prog.multipleProgress([
-                String(playlistTitle).green.bold,
-                ("Downloading \""+dl_title+'"').yellow,
-                progressData,
-                { total: 100, current: 0, label: 'waiting' }
-            ])
-
             src.pipe(dest)
             
             src.on("progress", (_, downloaded, size) => {
                 const percent = ((downloaded / size) * 100).toFixed(2);
-                const total_progress = label === "video and audio"  || label === "downloading" ? 102 : (format === 'mp3' ? 102 : total)
+                const total_progress = label === "video and audio" ? 100 : (format === 'mp3' ? 102 : total)
     
                 current = last_current + Math.floor(parseInt(percent))
 
@@ -155,8 +156,8 @@ function download(playlistTitle, data, bin, progressData, index) {
 
         if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
         if(fs.existsSync(nometadata)) fs.rmSync(dl_video_path, { force: true })
-        if(fs.existsSync(cover_jpg)) fs.rmSync(nometadata, { force: true })
-
+        if(fs.existsSync(cover_jpg)) fs.rmSync(cover_jpg, { force: true })
+    
         return resolve(result)
     })
 }

@@ -10,9 +10,10 @@ const util = require('../utils/tools')
 const manager = require('../utils/manager')
 
 const split = require('./split')
+const split_v2 = require('./split_v2')
 const single = require('./single')
 
-const download = util.config['split_download'] ? split : single
+const download = util.config['split_download'] ? split : util.config['split_download_v2'] ? split_v2 : single
 
 function downloadLooper(arr, bin, pl, id, int) {
     return new Promise(async(resolve) => {

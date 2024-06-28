@@ -77,12 +77,14 @@ module.exports.multipleProgress = (progressList = []) => {
         if(typeof v !== 'object') return v
         if(!v.total || !v.current || !v.label) return 'not-bar'
 
-        let { total, current, label } = v
-        let size = tools.config['centered_logging'] && terminal ? Math.floor((terminal.length) - (total === 100 ? Math.floor(2 + String(current).length) : Math.floor(2 + Math.floor(String(total).length + String(current).length)))) : 40
+        let { total, current, label, speed } = v
+
+        let raw_size = tools.config['centered_logging'] && terminal ? Math.floor((terminal.length) - (total === 100 ? Math.floor(2 + String(current).length) : Math.floor(2 + Math.floor(String(total).length + String(current).length)))) : 40
+        let size = speed ? raw_size - 1 - String(speed).length : raw_size
 
         const [bar] = createFilledBar(total, current, terminal.length >= 100 ? 100 : size);
 
-        return tools.config['centered_logging'] && terminal ? (total === 100 ? `${bar} ${current}%\n${label}` : `${bar} ${current}/${total}\n${label}`) : `${bar} ${label} ${current}/${total}`
+        return tools.config['centered_logging'] && terminal ? (total === 100 ? speed ? `${bar} ${String(speed)} ${current}%\n${label}` : `${bar} ${current}%\n${label}` : speed ? `${bar} ${String(speed)} ${current}/${total}\n${label}` : `${bar} ${current}/${total}\n${label}`) : `${bar} ${label} ${current}/${total}`
     }).filter(v => v !== 'not-bar')
 
     let message = bars.join('\n')

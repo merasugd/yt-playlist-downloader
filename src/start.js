@@ -81,7 +81,7 @@ function prompt(plId, q, f, t, verMsg) {
         let inner = String(t || await prompter.question("Multiple Playlist: (y/N) ")).toLowerCase()
         if(util.boolean(inner)) {
             let in_outputdir = path.resolve(String(await prompter.question("Output Dir: ")).replaceAll('"', ''))
-            if(in_outputdir === "" || in_outputdir.startsWith(" ") || in_outputdir.startsWith('"') || in_outputdir.endsWith('"') || !fs.existsSync(in_outputdir) || !(fs.statSync(in_outputdir).isDirectory())) return resolve(await prompt(plId, q, f, inner, verMsg))
+            if(util.pathCheck(in_outputdir)) return resolve(await prompt(plId, q, f, inner, verMsg))
 
             let in_move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
 
@@ -96,14 +96,16 @@ function prompt(plId, q, f, t, verMsg) {
 
         let playlistId = plId || await prompter.question("Playlist: ")
 
-        let quality = String(q || (await prompter.question("Quality (highest/lowest): "))).toLowerCase()
-        if((quality === "highest" || quality === "lowest") === false) return resolve(await prompt(playlistId, q, f, t, verMsg))
+        let quality_list = util.qualityCheck(null, true)
+        let quality = String(q || (await prompter.question(`Quality (${quality_list}): `))).toLowerCase()
+        if(!util.qualityCheck(quality)) return resolve(await prompt(playlistId, q, f, t, verMsg))
 
-        let format = String(f || await prompter.question("Format of Videos (mp4/mp3): ")).toLowerCase()
-        if((format === "mp4" || format === "mp3") === false) return resolve(await prompt(playlistId, quality, f, t, verMsg))
+        let format_list = util.formatCheck(null, true)
+        let format = String(f || await prompter.question(`Format of Videos (${format_list}): `)).toLowerCase()
+        if(!util.formatCheck(format)) return resolve(await prompt(playlistId, quality, f, t, verMsg))
 
         let outputdir = path.resolve(String(await prompter.question("Output Dir: ")).replaceAll('"', ''))
-        if(outputdir === "" || outputdir.startsWith(" ") || outputdir.startsWith('"') || outputdir.endsWith('"') || !fs.existsSync(outputdir) || !(fs.statSync(outputdir).isDirectory())) return resolve(await prompt(playlistId, quality, format, t, verMsg))
+        if(util.pathCheck(outputdir)) return resolve(await prompt(playlistId, quality, format, t, verMsg))
 
         let move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
         
@@ -171,17 +173,19 @@ function filters(verMsg, d_format, d_quality) {
                     data.exception = false
                 }
 
-                let format = await prompter.question(tit+'Video Format: (mp3/mp4) ')
+                let f_list = util.formatCheck(null, true)
+                let format = await prompter.question(tit+`Video Format: (${f_list}) '`)
 
-                if(format === 'mp3' || format === "mp4") {
+                if(!util.formatCheck(format)) {
                     data.format = format
                 } else {
                     data.format = d_format
                 }
 
-                let quality = await prompter.question(tit+'Video Quality: (highest/lowest) ')
+                let q_list = util.qualityCheck(null, true)
+                let quality = await prompter.question(tit+`Video Quality: (${q_list}) `)
 
-                if(quality === 'highest' || quality === "lowest") {
+                if(!util.qualityCheck(quality)) {
                     data.quality = quality
                 } else {
                     data.quality = d_quality
@@ -236,8 +240,8 @@ function looper(list, out, move, int) {
         let format = args[2].toLowerCase()
         let settings = JSON.parse(args.slice(3).join(':'))
 
-        if((quality === "highest" || quality === "lowest") === false) return resolve(103)
-        if((format === "mp4" || format === "mp3") === false) return resolve(104)
+        if(!util.qualityCheck(quality)) return resolve(103)
+        if(!util.formatCheck(format)) return resolve(104)
 
         let result = await main(false, listId, quality, format, out, move, settings)
 
@@ -283,7 +287,7 @@ function main(inner, id, quality, format, outputdir, move, settings, isThereLeft
         let playlist_videos = search_result.videos
 
         if(manager.is_completed(outputdir, search_result)) {
-            prog.log(`Skipping '${playlist_title}. It is already downloaded.`.yellow)
+            prog.log(`Skipping "${playlist_title}". It is already downloaded.`.yellow)
             await wait(2000)
             return resolve(100)
         }

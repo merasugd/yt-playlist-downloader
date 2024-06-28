@@ -13,18 +13,18 @@
         {
             "playlistId": "PLqkwNLhKQzB9jqCtp2keXjeIOUCfyMtbZ",
             "quality": "highest",
-            "format": "mp4",
+            "format": "mp3",
             "settings": [
                 {
                     "videoId": "CR93vAnwF9U",
                     "exception": false,
-                    "format": "mp4",
+                    "format": "mkv",
                     "quality": "highest"
                 },
                 {
                     "videoTitle": "Just Be Friends (Music Box, Off-Vocal) English Sub",
                     "exception": false,
-                    "format": "mp3",
+                    "format": "wav",
                     "quality": "lowest"
                 },
                 {

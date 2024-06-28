@@ -15,9 +15,21 @@ module.exports = function(playlistId, data) {
 
         playlistId = util.fetchPlaylistID(playlistId)
 
-        let list = await yt({ listId: playlistId })
+        let opt_pl = { listId: playlistId }
+        let opt_vd = playlistId
+        let typeGot = util.fetchId(playlistId)
+        let opt = typeGot === 'video' ? opt_vd : opt_pl
+
+        let list = await yt(opt)
         
         data = data || {}
+
+        if(typeGot === 'video') {
+            let firstVid = list.videos[0]
+
+            list.title = firstVid.title
+            list.videos = [ firstVid ]
+        }
 
         let pl = list.title
 
@@ -34,13 +46,13 @@ module.exports = function(playlistId, data) {
             let format = settings ? settings.format : data.format
             let quality = settings ? settings.quality : data.quality
 
-            if(format === 'mp4' || format === 'mp3') {
+            if(util.formatCheck(format)) {
                 format = format
             } else {
                 format = data.format
             }
 
-            if(quality === 'highest' || quality === 'lowest') {
+            if(util.qualityCheck(quality)) {
                 quality = quality
             } else {
                 quality = data.quality
