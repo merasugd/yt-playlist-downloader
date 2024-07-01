@@ -41,7 +41,7 @@ module.exports = function(pth, track, album, d) {
 
             let metadata = {
                 artist: artist(artists),
-                album_artist: artist(artists, 0),
+                album_artist: artist(artists),
                 track: track,
                 composer: artist(artists, 0),
                 album: data.album && data.album.name ? data.album.name : album,
