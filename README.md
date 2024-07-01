@@ -97,7 +97,7 @@ v1.0.8-pre
 - flac (Free Lossless Audio Codec)
 #### Video
 - mp4 (MPEG-4 Part 14)
-- mkv (Matroska Video Files)
+- mkv (Matroska Video)
 - flv (Flash Video)
 - avi (Audio Video Interleave)
 - mov (QuickTime/MOV)
