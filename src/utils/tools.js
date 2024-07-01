@@ -20,17 +20,17 @@ module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 
 
 module.exports.downloader = function() {
     let types = ['split-v1', 'single-v1', 'split-v2'].map((v, i) => { return { value: v, index: i } })
-    let downloader = module.exports.config['downloader']
+    let input = module.exports.config['downloader']
 
-    if(!downloader) {
+    if(!input) {
         prog.log('Downloader not set in config'.red)
         return process.exit(1)
     }
 
-    let use = types.find(v => v.value === downloader)
+    let use = types.find(v => v.value === input)
 
     if(!use) {
-        prog.log('Invalid Downloader ['.red+String(downloader).yellow.bold+']'.red)
+        prog.log('Invalid Downloader ['.red+String(input).yellow.bold+']'.red)
         return process.exit(1)
     }
 
