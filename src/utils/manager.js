@@ -34,7 +34,7 @@ module.exports.get = function(key) {
     return module.exports.read()[key]
 }
 
-module.exports.save = function(plID, pltitle, arr, out, move, lastindex) {
+module.exports.save = function(plID, pltitle, arr, out, move, author, lastindex) {
     if(!tools.config['safe_download']) return {}
 
     let base = module.exports.read()
@@ -45,7 +45,8 @@ module.exports.save = function(plID, pltitle, arr, out, move, lastindex) {
         move: move,
         data: {
             videos: arr,
-            playlist: pltitle
+            playlist: pltitle,
+            author: author
         },
         title: pltitle,
         index: lastindex,

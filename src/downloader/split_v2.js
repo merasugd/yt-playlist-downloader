@@ -11,7 +11,7 @@ const util = require('../utils/tools')
 const media = require('../utils/media')
 const downloader = require('./ytdl/download')
 
-function download(playlistTitle, data, bin, progressData, index) {
+function download(playlistTitle, data, bin, progressData, author, index) {
     let url = data.url;
     let title = data.title
 
@@ -178,7 +178,7 @@ function download(playlistTitle, data, bin, progressData, index) {
                         { total: 100, current: Math.floor((current / total) * 100), label: 'metadata' }
                     ])
 
-                    await media.editVideoMetadata(playlistTitle, index, dl_title, progressData, url, dl_path, nometadata, cover_jpg, final_format, dl_final_path)
+                    await media.editVideoMetadata(playlistTitle, index, dl_title, progressData, url, dl_path, nometadata, cover_jpg, final_format, dl_final_path, author)
 
                     current = current + 1
 
@@ -198,7 +198,7 @@ function download(playlistTitle, data, bin, progressData, index) {
         if(result === 100) {
             if(fs.existsSync(dl_audio_path) && format === 'mp3') {
                 await require('fs/promises').rename(dl_audio_path, dl_raw_path)
-                await media.editSongMetadata(playlistTitle, index, url, dl_raw_path, dl_path, progressData, dl_title, cover_jpg, final_format, dl_final_path)
+                await media.editSongMetadata(playlistTitle, index, url, dl_raw_path, dl_path, progressData, dl_title, cover_jpg, final_format, dl_final_path, author)
             }
             
             if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })

@@ -113,7 +113,7 @@ module.exports.cut = function(inp) {
     })
 }
 
-module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, final_path, progressData, song_title, cover, final_format, final_dl_path) {
+module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, final_path, progressData, song_title, cover, final_format, final_dl_path, composer) {
     return new Promise(async(resolve) => {
         prog.multipleProgress([
             String(playlistTitle).green.bold,
@@ -146,9 +146,11 @@ module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, 
             return resolve(101)
         }
 
+        composer = composer || {}
+
         let default_meta = {
             artist: data.author.name,
-            composer: data.author.name,
+            composer: (composer.author||{name:'YTPLDl'}).name,
             track: track,
             album: playlistTitle,
             title: data.title,
@@ -194,7 +196,7 @@ module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, 
     })
 }
 
-module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, progressData, url, video_path, nometadata, cover, final_format, final_dl_path) {
+module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, progressData, url, video_path, nometadata, cover, final_format, final_dl_path, composer) {
     return new Promise(async(resolve) => {
         let data = await util.searchYt(url, [
             String(playlistTitle).green.bold,
@@ -211,6 +213,8 @@ module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, prog
             return resolve(101)
         }
 
+        composer = composer || {}
+
         await fsp.rename(video_path, nometadata)
 
         let proc = cp.spawn(ffmpeg, [
@@ -218,6 +222,7 @@ module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, prog
             '-map', '0', '-map', '1',
             '-metadata', `title=${data.title}`,
             '-metadata', `artist=${data.author.name}`,
+            '-metadata', `composer=${(composer.author||{name:'YTPLDl'}).name}`,
             '-metadata', `year=${data.uploadDate.split('-')[0]}`,
             '-metadata', `date=${data.uploadDate.split('-')[0]}`,
             '-metadata', `genre=${data.genre}`,

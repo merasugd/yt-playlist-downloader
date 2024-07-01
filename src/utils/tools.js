@@ -18,6 +18,25 @@ module.exports.sanitizeTitle = function (title) {
 module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'config.json'), { encoding: 'utf-8' }))
 module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'download.json'), { encoding: 'utf-8' }))
 
+module.exports.downloader = function() {
+    let types = ['split', 'single', 'split-v2'].map((v, i) => { return { value: v, index: i } })
+    let downloader = module.exports.config['downloader']
+
+    if(!downloader) {
+        prog.log('Downloader not set in config'.red)
+        return process.exit(1)
+    }
+
+    let use = types.find(v => v.value === downloader)
+
+    if(!use) {
+        prog.log('Invalid Downloader ['.red+String(downloader).yellow.bold+']'.red)
+        return process.exit(1)
+    }
+
+    return use.index
+}
+
 module.exports.fetchPlaylistID = function (inputUrl) {
     const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]list=)|youtu\.be\/)([^"&?\/\s]{34})/;
 
@@ -65,19 +84,27 @@ module.exports.formatCheck = function(input, list, defaultf, ffmpeg_args) {
         'mp3',
         'ogg',
         'wav',
+        'm4a',
+        'flac',
         'mp4',
         'mkv',
-        'flv'
+        'flv',
+        'avi',
+        'mov'
     ]
     let audio_formats = [
         'ogg',
         'mp3',
-        'wav'
+        'wav',
+        'm4a',
+        'flac'
     ]
     let video_formats = [
         'mkv',
         'mp4',
-        'flv'
+        'flv',
+        'avi',
+        'mov'
     ]
     let found = formats.find(v => v === input)
 
@@ -103,6 +130,15 @@ module.exports.formatCheck = function(input, list, defaultf, ffmpeg_args) {
             '-f', 'flv', '-y',
             defaultf
         ]
+        if(input === 'avi') return [
+            '-i', list,
+            '-codec', 'copy',
+            defaultf
+        ]
+        if(input === 'mov') return [
+            '-i', list,
+            '-f', 'mov', defaultf
+        ]
 
         if(input === 'ogg') return [
             '-i', list,
@@ -111,6 +147,16 @@ module.exports.formatCheck = function(input, list, defaultf, ffmpeg_args) {
             defaultf
         ]
         if(input === 'wav') return [
+            '-i', list,
+            defaultf
+        ]
+        if(input === 'm4a') return [
+            '-i', list,
+            '-c:a', 'aac',
+            '-vn',
+            defaultf
+        ]
+        if(input === 'flac') return [
             '-i', list,
             defaultf
         ]
@@ -126,7 +172,7 @@ module.exports.formatCheck = function(input, list, defaultf, ffmpeg_args) {
         if(video_formats.find(vv => vv === found)) return 'mp4'
     } else if(defaultf && !found) return 'mp4'
 
-    if(list) return formats.join('/')
+    if(list) return formats
 
     if(found) return true
 
@@ -144,7 +190,7 @@ module.exports.qualityCheck = function(input, list) {
         'lowest'
     ].filter(v => !module.exports.config['split_download_v2'] && v !== 'medium')
 
-    if(list) return quality.join('/')
+    if(list) return quality
 
     if(quality.find(v => v === input)) return true
     

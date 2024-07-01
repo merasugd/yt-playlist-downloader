@@ -8,7 +8,7 @@ const prog = require('../utils/progress')
 const util = require('../utils/tools')
 const media = require('../utils/media')
 
-function download(playlistTitle, data, bin, progressData, index) {
+function download(playlistTitle, data, bin, progressData, author, index) {
     let url = data.url;
     let title = data.title
 
@@ -94,7 +94,7 @@ function download(playlistTitle, data, bin, progressData, index) {
                     { total: 100, current: Math.floor((current / 102) * 100), label: "metadata" }
                 ])
 
-                let r = await media.editVideoMetadata(playlistTitle, index, dl_title, progressData, uri, dl_path, nometadata, cover_jpg, final_format, dl_final_path)
+                let r = await media.editVideoMetadata(playlistTitle, index, dl_title, progressData, uri, dl_path, nometadata, cover_jpg, final_format, dl_final_path, author)
                 current = current + 1
 
                 prog.multipleProgress([
@@ -114,7 +114,7 @@ function download(playlistTitle, data, bin, progressData, index) {
             let res_a = await pipeStream(audio, audioStream, "downloading")
             if(res_a !== 100) return resolve(res_a)
 
-            let result = await media.editSongMetadata(playlistTitle, index, uri, dl_raw_path, dl_path, progressData, dl_title, cover_jpg, final_format, dl_final_path)
+            let result = await media.editSongMetadata(playlistTitle, index, uri, dl_raw_path, dl_path, progressData, dl_title, cover_jpg, final_format, dl_final_path, author)
 
             return resolve(result)
         })

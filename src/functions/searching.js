@@ -29,9 +29,11 @@ module.exports = function(playlistId, data) {
 
             list.title = firstVid.title
             list.videos = [ firstVid ]
+            list.author = firstVid.author
         }
 
         let pl = list.title
+        let author = list.author
 
         prog.multipleProgress([
             "Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green,
@@ -69,6 +71,7 @@ module.exports = function(playlistId, data) {
         
         return resolve({
             playlist: pl,
+            author: author,
             videos: videos
         })
     })

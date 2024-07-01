@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.7**
+**v1.0.8-pre**
 
 older versions can be downloaded thru releases
 
@@ -81,6 +81,12 @@ v1.0.7-pre
 - Added song cover for mp3.
 - `split_download` defaults to `false` again.
 - Skips downloaded playlist if same output path.
+
+v1.0.8-pre
+- Made the downloader into one config (eg. `downloader: 'single'`) [Types are: single, split and split-v2]
+- Added more formats. (m4a/flac/mov/avi)
+- Added list prompt for quality and format.
+- Fixed video specific settings.
 
 ## Note
 - When downloading formats other than mp4/mp3. It might contribute to slowness since it converts to mp4/mp3 first before converting to format.

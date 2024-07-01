@@ -11,24 +11,24 @@
     },
     "playlists": [
         {
-            "playlistId": "PLqkwNLhKQzB9jqCtp2keXjeIOUCfyMtbZ",
+            "playlistId": "PLs5tceiYBACxtsWYb3fQTYSQHEmFl3aTX",
             "quality": "highest",
-            "format": "mp3",
+            "format": "flac",
             "settings": [
                 {
-                    "videoId": "CR93vAnwF9U",
+                    "videoId": "uKxyLmbOc0Q",
                     "exception": false,
-                    "format": "mkv",
+                    "format": "mp3",
                     "quality": "highest"
                 },
                 {
-                    "videoTitle": "Just Be Friends (Music Box, Off-Vocal) English Sub",
+                    "videoTitle": "Cherrybonbon",
                     "exception": false,
-                    "format": "wav",
+                    "format": "mov",
                     "quality": "lowest"
                 },
                 {
-                    "videoIndex": 19,
+                    "videoIndex": 10,
                     "exception": true
                 }
             ]

@@ -13,9 +13,12 @@ const split = require('./split')
 const split_v2 = require('./split_v2')
 const single = require('./single')
 
-const download = util.config['split_download'] ? split : util.config['split_download_v2'] ? split_v2 : single
+const download_setting = util.downloader()
+const download = download_setting === 0 ? split : download_setting === 1 ? single : download_setting === 2 ? split_v2 : null
 
-function downloadLooper(arr, bin, pl, id, int) {
+if(!download) return process.exit(1)
+
+function downloadLooper(arr, bin, pl, aut, id, int) {
     return new Promise(async(resolve) => {
         let item = arr[int]
 
@@ -43,15 +46,15 @@ function downloadLooper(arr, bin, pl, id, int) {
 
         let index = String(int+1)
 
-        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' }, index)
+        let dlResult = await download(pl, item, bin, { current, total, label: 'playlist' }, aut, index)
 
         if(dlResult !== 100) return resolve(101)
 
-        return resolve((await downloadLooper(arr, bin, pl, id, int+1)))
+        return resolve((await downloadLooper(arr, bin, pl, aut, id, int+1)))
     })
 }
 
-module.exports = function(conDl, arr, pl, id, output, move) {
+module.exports = function(conDl, arr, pl, aut, id, output, move) {
     return new Promise(async(resolve) => {
         let playlist = path.join(pather, util.sanitizeTitle(String(pl))
             .replaceAll(' ', '_')
@@ -59,7 +62,7 @@ module.exports = function(conDl, arr, pl, id, output, move) {
         )
 
         if(!conDl && util.config['safe_download']) {
-            manager.save(id, pl, arr, output, move, 0)
+            manager.save(id, pl, arr, output, move, aut, 0)
         }
 
         if(!conDl && fs.existsSync(playlist)) {
@@ -69,7 +72,7 @@ module.exports = function(conDl, arr, pl, id, output, move) {
 
         if(!fs.existsSync(playlist)) fs.mkdirSync(playlist)
         
-        let result = await downloadLooper(arr, playlist, pl, id, conDl ? (conDl.index || 0) : 0)
+        let result = await downloadLooper(arr, playlist, pl, aut, id, conDl ? (conDl.index || 0) : 0)
 
         if(result !== 100) {
             prog.log("Failed".red.bold)
