@@ -91,7 +91,7 @@ v1.0.8-pre
 ## Supported Formats
 #### Audio
 - mp3 (MPEG Audio Layer 3)
-- ogg (Opus/Vorbis)
+- ogg (Ogg Vorbis)
 - wav (Waveform Audio File Format)
 - m4a (MPEG-4 Audio File)
 - flac (Free Lossless Audio Codec)
