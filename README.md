@@ -118,6 +118,7 @@ v1.0.8-pre
 - **Simple Download**: Easy to use for downloading YouTube content.
 - **Compression**: Option to compress downloads into a zip file or move them to a directory.
 - **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.
+- **Multi-Format**: Supports formats like `flac`, `ogg` and more.
 
 ## Support
 
