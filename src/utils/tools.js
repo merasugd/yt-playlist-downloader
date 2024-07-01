@@ -19,7 +19,7 @@ module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '.
 module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'download.json'), { encoding: 'utf-8' }))
 
 module.exports.downloader = function() {
-    let types = ['split', 'single', 'split-v2'].map((v, i) => { return { value: v, index: i } })
+    let types = ['split-v1', 'single-v1', 'split-v2'].map((v, i) => { return { value: v, index: i } })
     let downloader = module.exports.config['downloader']
 
     if(!downloader) {
