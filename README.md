@@ -83,7 +83,7 @@ v1.0.7-pre
 - Skips downloaded playlist if same output path.
 
 v1.0.8-pre
-- Made the downloader into one config (eg. `downloader: 'single'`) [Types are: single, split and split-v2]
+- Made the downloader into one config (eg. `downloader: 'split-v2'`) [Types are: single-v1, split-v1 and split-v2]
 - Added more formats. (m4a/flac/mov/avi)
 - Added list prompt for quality and format.
 - Fixed video specific settings.
