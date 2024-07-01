@@ -93,7 +93,7 @@ v1.0.8-pre
 - mp3 (MPEG Audio Layer 3)
 - ogg (Ogg Vorbis)
 - wav (Waveform Audio File Format)
-- m4a (MPEG-4 Audio File)
+- m4a (MPEG-4 Audio)
 - flac (Free Lossless Audio Codec)
 #### Video
 - mp4 (MPEG-4 Part 14)
