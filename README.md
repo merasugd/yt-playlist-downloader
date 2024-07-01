@@ -88,6 +88,20 @@ v1.0.8-pre
 - Added list prompt for quality and format.
 - Fixed video specific settings.
 
+## Supported Formats
+#### Audio
+- mp3 (MPEG Audio Layer 3)
+- ogg (Opus/Vorbis)
+- wav (Waveform Audio File Format)
+- m4a (MPEG-4 Audio File)
+- flac (Free Lossless Audio Codec)
+#### Video
+- mp4 (MPEG-4 Part 14)
+- mkv (Matroska Video Files)
+- flv (Flash Video)
+- avi (Audio Video Interleave)
+- mov (QuickTime/MOV)
+
 ## Note
 - When downloading formats other than mp4/mp3. It might contribute to slowness since it converts to mp4/mp3 first before converting to format.
 - The internet check might contribute to slowness. (it depends on your net, you can turn it off in the config).
