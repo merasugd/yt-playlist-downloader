@@ -97,13 +97,15 @@ function prompt(plId, q, f, t, verMsg) {
 
         let inner = String(t || await prompter.question("Multiple Playlist: (y/N) ")).toLowerCase()
         if(util.boolean(inner)) {
-            let in_outputdir = path.resolve(String(await prompter.question("Output Dir: ")).replaceAll('"', ''))
-            if(util.pathCheck(in_outputdir)) return resolve(await prompt(plId, q, f, inner, verMsg))
+            let in_ans_outputdir = String(await prompter.question("Output Dir: ")).replaceAll('"', '')
+            let in_outputdir = path.resolve(in_ans_outputdir)
+            if(!util.pathCheck(in_ans_outputdir, in_outputdir)) return resolve(await prompt(plId, q, f, inner, verMsg))
+            in_outputdir = util.pathCheck(in_ans_outputdir, in_outputdir)
 
             let in_move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
 
             prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
-            let in_areyousure = String(await prompter.question(`Data:\nMultiple Playlists: ${(inner === 'y' ? 'true' : 'false').cyan}\nOutputDir: ${(in_outputdir).cyan}\nCompress: ${String(in_move ? false : true).cyan}\n\nAre you sure with this: (y/N) `))
+            let in_areyousure = String(await prompter.question(`Data:\nMultiple Playlists: ${(inner === 'y' ? 'true' : 'false').cyan}\nOutput Dir: ${(in_outputdir).cyan}\nCompress: ${String(in_move ? false : true).cyan}\n\nAre you sure with this: (y/N) `))
             if(in_areyousure === "n" || in_areyousure === 'no') {
                 return resolve(await prompt(false, false, false, false, verMsg))
             }
@@ -122,15 +124,17 @@ function prompt(plId, q, f, t, verMsg) {
         let format = String(f || await listPrompt(format_list, 'Format')).toLowerCase()
         if(!util.formatCheck(format)) return resolve(await prompt(playlistId, quality, f, 'n', verMsg))
 
-        let outputdir = path.resolve(String(await prompter.question("Output Dir: ")).replaceAll('"', ''))
-        if(util.pathCheck(outputdir)) return resolve(await prompt(playlistId, quality, format, 'n', verMsg))
+        let ans_outputdir = String(await prompter.question("Output Dir: ")).replaceAll('"', '')
+        let outputdir = path.resolve(ans_outputdir)
+        if(!util.pathCheck(ans_outputdir, outputdir)) return resolve(await prompt(playlistId, quality, format, 'n', verMsg))
+        outputdir = util.pathCheck(ans_outputdir, outputdir)
 
         let move = String(await prompter.question("Compress To Zip Or Move To Output (zip/move): ")).toLowerCase() === "zip" ? false : true
         
         let makeExceptions = await filters(verMsg, format, quality)
 
         prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
-        let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${(playlistId).cyan}\nQuality: ${(quality).cyan}\nFormat: ${(format).cyan}\nOutputDir: ${(outputdir).cyan}\nCompress: ${String(move ? false : true).cyan}\nSettings: ${JSON.stringify(makeExceptions).cyan}\n\nAre you sure with this: (y/N) `))
+        let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${(util.fetchPlaylistID(playlistId)).cyan}\nQuality: ${(quality).cyan}\nFormat: ${(format).cyan}\nOutput Dir: ${(outputdir).cyan}\nCompress: ${String(move ? false : true).cyan}\nSettings: ${JSON.stringify(makeExceptions).cyan}\n\nAre you sure with this: (y/N) `))
         if(areyousure === "n" || areyousure === 'no') {
             return resolve(await prompt(false, false, false, false, verMsg))
         }

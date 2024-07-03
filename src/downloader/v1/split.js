@@ -3,13 +3,14 @@ const fs = require('fs');
 const path = require('path');
 const colors = require('colors');
 const ffmpeg = require('ffmpeg-static')
-const HttpsProxyAgent = require('https-proxy-agent')
 
 const cp = require('child_process')
 
-const prog = require('../utils/progress')
-const util = require('../utils/tools')
-const media = require('../utils/media');
+const prog = require('../../utils/progress')
+const util = require('../../utils/tools')
+const media = require('../../utils/media')
+
+const cookie = require('../../tools/cookie')
 
 function download(playlistTitle, data, bin, progressData, author, index) {
     let url = data.url;
@@ -39,19 +40,7 @@ function download(playlistTitle, data, bin, progressData, author, index) {
     if(fs.existsSync(dl_path)) fs.rmSync(dl_path, { force: true })
     if(fs.existsSync(dl_final_path)) fs.rmSync(dl_final_path, { force: true })
 
-    let cookies = util.settings['cookie'] || ''
-    let proxyServer = util.settings['proxy_server'] || ''
-    let proxyAgent = proxyServer !== '' && !proxyServer.startsWith(' ') ? HttpsProxyAgent(proxyServer) : undefined
-    let ytIdentityToken = typeof util.settings['youtube_identity_token'] === 'string' && util.settings['youtube_identity_token'] !== '' && !util.settings['youtube_identity_token'].startsWith(' ') ? util.settings['youtube_identity_token'] : undefined
-
-    let dlOptions = {}
-
-    if(util.config['use_youtube_cookies']) {
-        dlOptions = cookies !== '' && !cookies.startsWith(' ') ? Object.assign({ requestOptions: { headers: { cookie: cookies, 'x-youtube-identity-token': ytIdentityToken } } }, dlOptions) : dlOptions
-    }
-    if(util.config['use_proxy_server']) {
-        dlOptions = proxyServer !== '' && !proxyServer.startsWith(' ') && proxyServer.startsWith('http') ? Object.assign({ requestOptions: { agent: proxyAgent } }, dlOptions) : dlOptions
-    }
+    let dlOptions = cookie.use()
 
     let total = 203
     let current = 0
@@ -191,10 +180,10 @@ function download(playlistTitle, data, bin, progressData, author, index) {
                         String(playlistTitle).green.bold,
                         ("Downloading \""+dl_title+'"').yellow,
                         progressData,
-                        { total: 100, current: Math.floor((current / total) * 100), label: 'converting' }
+                        { total: 100, current: Math.floor((current / total) * 100), label: 'converting to '+final_format }
                     ])
 
-                    await media.convertMp4(dl_raw_path, dl_path)
+                    await media.convert(dl_raw_path, dl_path, format)
 
                     if(fs.existsSync(dl_raw_path)) fs.rmSync(dl_raw_path, { force: true })
 

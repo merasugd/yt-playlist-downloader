@@ -9,12 +9,14 @@ const prog = require('../utils/progress')
 const util = require('../utils/tools')
 const manager = require('../utils/manager')
 
-const split = require('./split')
-const split_v2 = require('./split_v2')
-const single = require('./single')
+const split = require('./v1/split')
+const single = require('./v1/single')
+
+const split_v2 = require('./v2/split')
+const single_v2 = require('./v2/single')
 
 const download_setting = util.downloader()
-const download = download_setting === 0 ? split : download_setting === 1 ? single : download_setting === 2 ? split_v2 : null
+const download = download_setting === 0 ? split : download_setting === 1 ? single : download_setting === 2 ? split_v2 : download_setting === 3 ? single_v2 : null
 
 if(!download) return process.exit(1)
 

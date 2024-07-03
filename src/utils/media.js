@@ -1,7 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 const fsp = require('fs/promises')
-const metadata = require('ffmetadata')
 const ffmpeg = require('ffmpeg-static')
 const ffprobe = require('ffprobe-static').path
 const cp = require('child_process')
@@ -11,6 +10,8 @@ const uuid = require('uuid').v4
 const prog = require('./progress')
 const util = require('./tools')
 const song = require('./song')
+
+const metadata = require('../tools/ffmetadata')
 
 metadata.setFfmpegPath(ffmpeg)
 
@@ -33,10 +34,7 @@ module.exports.ffmpeg = function(args) {
 
 module.exports.convertMp4 = function(inp, out) {
     return new Promise(async(resolve) => {
-        let proc = cp.spawn(ffmpeg, [
-            '-i', inp,
-            '-c:v', 'copy', out
-        ], {
+        let proc = cp.spawn(ffmpeg, util.formatCheck('mp4', inp, out, true), {
             windowsHide: true
         })    
 
@@ -50,6 +48,7 @@ module.exports.convertMp4 = function(inp, out) {
         })
     })
 }
+
 module.exports.convert = function(inp, out, fom) {
     return new Promise(async(resolve) => {
         let result = await module.exports.ffmpeg(util.formatCheck(fom, inp, out, true))
@@ -68,11 +67,7 @@ module.exports.convert = function(inp, out, fom) {
 
 module.exports.convertMp3 = function(inp, out) {
     return new Promise(async(resolve) => {
-        let proc = cp.spawn(ffmpeg, [
-            '-i', inp,
-            '-vn', '-ab', '128k', '-ar', '44100',
-            '-y', out
-        ], {
+        let proc = cp.spawn(ffmpeg, util.formatCheck('mp3', inp, out, true), {
             windowsHide: true
         })
 
@@ -119,10 +114,10 @@ module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, 
             String(playlistTitle).green.bold,
             ("Downloading \""+song_title+'"').yellow,
             progressData,
-            { total: 100, current: 98, label: 'converting to mp3' }
+            { total: 100, current: 98, label: 'converting to '+final_format }
         ])
 
-        await module.exports.convertMp3(raw_path, final_path)
+        await module.exports.convert(raw_path, final_path, 'mp3')
 
         if(fs.existsSync(raw_path)) fs.rmSync(raw_path, { force: true })
 
@@ -175,21 +170,15 @@ module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, 
                 { total: 100, current: 100, label: 'metadata' }
             ])
 
+            if(final_format !== 'mp3') {
+                let res_c = await module.exports.convert(final_path, final_dl_path, final_format)
+                if(res_c !== 100) return resolve(res_c)
+
+                if(fs.existsSync(final_path)) fs.rmSync(final_path, { force: true })
+            }
+
             if(fs.existsSync(raw_path)) fs.rmSync(raw_path, { force: true })
             if(fs.existsSync(cover)) fs.rmSync(cover, { force: true })
-
-            if(!final_path.endsWith(final_format)) {
-                prog.multipleProgress([
-                    String(playlistTitle).green.bold,
-                    ("Downloading \""+song_title+'"').yellow,
-                    progressData,
-                    { total: 100, current: 100, label: 'converting to '+final_format }
-                ])
-
-                let res = await module.exports.convert(final_path, final_dl_path, final_format)
-
-                return resolve(res)
-            }
 
             if(err) return resolve(101)
             return resolve(100)
@@ -252,21 +241,15 @@ module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, prog
         })
 
         proc.on('close', async() => { 
+            if(final_format !== 'mp4') {
+                let res_c = await module.exports.convert(video_path, final_dl_path, final_format)
+                if(res_c !== 100) return resolve(res_c)
+
+                if(fs.existsSync(video_path)) fs.rmSync(video_path, { force: true })
+            }
+
             if(fs.existsSync(nometadata)) await fsp.rm(nometadata, { force: true })
             if(fs.existsSync(cover)) fs.rmSync(cover, { force: true })
-
-            if(!video_path.endsWith(final_format)) {
-                prog.multipleProgress([
-                    String(playlistTitle).green.bold,
-                    ("Downloading \""+video_title+'"').yellow,
-                    progressData,
-                    { total: 100, current: 100, label: 'converting to '+final_format }
-                ])
-
-                let res = await module.exports.convert(video_path, final_dl_path, final_format)
-    
-                return resolve(res)
-            }
 
             return resolve(100)
         })

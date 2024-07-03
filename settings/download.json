@@ -1,6 +1,5 @@
 {
-    "cookie": "",
-    "youtube_identity_token": "",
+    "own_cookie": "",
     "proxy_server": "",
     "acrcloud": {
         "host": "",
@@ -24,7 +23,7 @@
                 {
                     "videoTitle": "Cherrybonbon",
                     "exception": false,
-                    "format": "mov",
+                    "format": "avi",
                     "quality": "lowest"
                 },
                 {

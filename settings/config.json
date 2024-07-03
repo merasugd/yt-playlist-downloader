@@ -4,6 +4,5 @@
     "internet_checking": true,
     "centered_logging": true,
     "music_metadata": false,
-    "use_youtube_cookies": false,
     "use_proxy": false
 }

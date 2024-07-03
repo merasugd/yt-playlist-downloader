@@ -1,6 +1,5 @@
 const fs = require('fs')
 const path = require('path')
-const metadata = require('ffmetadata')
 const search = require('yt-search')
 const ffmpeg = require('ffmpeg-static')
 const check_net = require('check-internet-connected')
@@ -8,6 +7,8 @@ const request = require('request')
 const url = require('node:url')
 
 const prog = require('./progress')
+
+const metadata = require('../tools/ffmetadata')
 
 metadata.setFfmpegPath(ffmpeg)
 
@@ -19,7 +20,7 @@ module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '.
 module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'download.json'), { encoding: 'utf-8' }))
 
 module.exports.downloader = function() {
-    let types = ['split-v1', 'single-v1', 'split-v2'].map((v, i) => { return { value: v, index: i } })
+    let types = ['split-v1', 'single-v1', 'split-v2', 'single-v2'].map((v, i) => { return { value: v, index: i } })
     let input = module.exports.config['downloader']
 
     if(!input) {
@@ -109,6 +110,10 @@ module.exports.formatCheck = function(input, list, defaultf, ffmpeg_args) {
     let found = formats.find(v => v === input)
 
     if(ffmpeg_args) {
+        if(input === 'mp4') return [
+            '-i', list,
+            '-c:v', 'copy', defaultf
+        ]
         if(input === 'mkv') return [
             '-i', list,
             '-map', '0:0', '-map', '0:1',
@@ -140,6 +145,11 @@ module.exports.formatCheck = function(input, list, defaultf, ffmpeg_args) {
             '-f', 'mov', defaultf
         ]
 
+        if(input === 'mp3') return [
+            '-i', list,
+            '-vn', '-ab', '128k', '-ar', '44100',
+            '-y', defaultf
+        ]
         if(input === 'ogg') return [
             '-i', list,
             '-c:a', 'libvorbis',
@@ -179,8 +189,17 @@ module.exports.formatCheck = function(input, list, defaultf, ffmpeg_args) {
     return false
 }
 
-module.exports.pathCheck = function(input) {
-    return input && input === "" || input.startsWith(" ") || input.startsWith('"') || input.endsWith('"') || !fs.existsSync(input) || !(fs.statSync(input).isDirectory())
+module.exports.pathCheck = function(input, input2) {
+    let home = require('node:os').homedir()
+    let downloads = path.join(home, 'Downloads')
+    let check = input && input === "" || input.startsWith(" ") || input.startsWith('"') || input.endsWith('"') || !input
+
+    if(!fs.existsSync(downloads) && check) fs.mkdirSync(downloads)
+
+    if(check) return downloads
+    if(fs.existsSync(input2) && (fs.statSync(input2).isDirectory())) return input
+
+    return false
 }
 
 module.exports.qualityCheck = function(input, list) {

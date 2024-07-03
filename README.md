@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.8-pre**
+**v1.0.8**
 
 older versions can be downloaded thru releases
 
@@ -51,6 +51,13 @@ v1.0.7
 - Added video support.
 - Cleaned the code a little.
 - Added medium for quality. (only in `split_download_v2`)
+
+v1.0.8
+- Modified V2 Downloaders (Using ytdl-core to search formats)
+- New Cookie System.
+- Organized files.
+- No more support for V1 downloaders. More focused on V2 and an upcoming V3 downloader.
+- Added default output dir. (Means you can skip output dir or dont provide any)
 
 ## Pre-Releases
 v1.0.3-pre
