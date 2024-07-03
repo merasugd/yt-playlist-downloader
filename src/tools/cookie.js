@@ -29,7 +29,9 @@ module.exports.use = function() {
 }
 
 function getCookie() {
-    let cookie = util.settings['own_cookie'] || default_cookie
+    let own_cookie_fetched = util.settings['own_cookie'] || ''
+    let own_cookie = own_cookie_fetched ? own_cookie_fetched === '' || own_cookie_fetched.startsWith(' ') ? null : own_cookie : null
+    let cookie = own_cookie || default_cookie
 
     if(cookie === default_cookie) {
         return { cookie, id: default_id_token }

@@ -15,7 +15,6 @@ const searching = require('./functions/searching')
 const compressor = require('./functions/compressor')
 
 const downloader = require('./downloader/main')
-const { forever } = require("request")
 
 //unused since final 1.0.3 release
 /*if(!fs.existsSync(path.join(__dirname, "playlists.txt"))) fs.writeFileSync(path.join(__dirname, "playlists.txt"), `## this is used so you can download multiple playlist
@@ -135,7 +134,7 @@ function prompt(plId, q, f, t, verMsg) {
 
         prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
         let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${(util.fetchPlaylistID(playlistId)).cyan}\nQuality: ${(quality).cyan}\nFormat: ${(format).cyan}\nOutput Dir: ${(outputdir).cyan}\nCompress: ${String(move ? false : true).cyan}\nSettings: ${JSON.stringify(makeExceptions).cyan}\n\nAre you sure with this: (y/N) `))
-        if(areyousure === "n" || areyousure === 'no') {
+        if(!util.boolean(areyousure)) {
             return resolve(await prompt(false, false, false, false, verMsg))
         }
  
@@ -148,7 +147,7 @@ function filters(verMsg, d_format, d_quality) {
         let makeOne = await prompter.question('Settings for a video: (y/N) ')
         let all = []
 
-        if(makeOne === "n" || makeOne === 'no') {
+        if(!util.boolean(makeOne)) {
             return resolve(all)
         }
 

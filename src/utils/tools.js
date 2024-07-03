@@ -19,9 +19,11 @@ module.exports.sanitizeTitle = function (title) {
 module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'config.json'), { encoding: 'utf-8' }))
 module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'download.json'), { encoding: 'utf-8' }))
 
-module.exports.downloader = function() {
+module.exports.downloader = function(list) {
     let types = ['split-v1', 'single-v1', 'split-v2', 'single-v2'].map((v, i) => { return { value: v, index: i } })
     let input = module.exports.config['downloader']
+
+    if(list) return types.map(v => v.value)
 
     if(!input) {
         prog.log('Downloader not set in config'.red)
@@ -317,13 +319,7 @@ module.exports.basicDL = function(uri, out) {
 }
 
 module.exports.boolean = function(bool) {
-    bool = bool.toLowerCase()
-
-    if(bool === 'y' || bool === 'yes' || bool === 'true') {
-        return true
-    }
-    
-    return false
+    return  bool.toLowerCase() === 'n' || bool.toLowerCase() === 'false' || bool.toLowerCase() === 'no' ? false : bool.toLowerCase() === 'y' || bool.toLowerCase() === 'true' || bool.toLowerCase() === 'yes' ? true : null
 }
 
 module.exports.acrcloud = function() {
