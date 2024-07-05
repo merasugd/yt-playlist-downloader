@@ -30,7 +30,7 @@ module.exports.use = function() {
 
 function getCookie() {
     let own_cookie_fetched = util.settings['own_cookie'] || ''
-    let own_cookie = own_cookie_fetched ? own_cookie_fetched === '' || own_cookie_fetched.startsWith(' ') ? null : own_cookie : null
+    let own_cookie = own_cookie_fetched ? own_cookie_fetched === '' || own_cookie_fetched.startsWith(' ') ? null : own_cookie_fetched : null
     let cookie = own_cookie || default_cookie
 
     if(cookie === default_cookie) {
