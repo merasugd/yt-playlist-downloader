@@ -191,10 +191,10 @@ module.exports.formatCheck = function(input, list, defaultf, ffmpeg_args) {
     return false
 }
 
-module.exports.pathCheck = function(input, input2) {
+module.exports.pathCheck = function(input = "", input2) {
     let home = require('node:os').homedir()
     let downloads = path.join(home, 'Downloads')
-    let check = input && input === "" || input.startsWith(" ") || input.startsWith('"') || input.endsWith('"') || !input
+    let check = input === "" || input.startsWith(" ") || input.startsWith('"') || input.endsWith('"') || !input
 
     if(!fs.existsSync(downloads) && check) fs.mkdirSync(downloads)
 
