@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.8**
+**v1.0.9**
 
 older versions can be downloaded thru releases
 
@@ -94,6 +94,9 @@ v1.0.8-pre
 - Added more formats. (m4a/flac/mov/avi)
 - Added list prompt for quality and format.
 - Fixed video specific settings.
+
+v1.0.9
+- Split V2 Downloaders is now downloads both audio and video at the same time.
 
 ## Supported Formats
 #### Audio

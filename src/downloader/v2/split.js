@@ -8,6 +8,7 @@ const cp = require('child_process')
 const prog = require('../../utils/progress')
 const util = require('../../utils/tools')
 const media = require('../../utils/media')
+const multi = require('../../tools/multiple_download')
 const downloader = require('../../tools/ytdl')
 
 function download(playlistTitle, data, bin, progressData, author, index) {
@@ -53,12 +54,14 @@ function download(playlistTitle, data, bin, progressData, author, index) {
                 { total: 100, current: 0, label: 'waiting' }
             ])
 
-            let res_audio = await progressStream(uri, dl_audio_path, 'audio')
-            if(res_audio !== 100) return resolve(res_audio)
+            if(format === 'mp3') {
+                let res_audio = await progressStreamA(uri, dl_audio_path, 'audio')
+                if(res_audio !== 100) return resolve(res_audio)
 
-            if(format === 'mp3') return resolve(100)
+                return resolve(100)
+            }
 
-            let res_video = await progressStream(uri, dl_video_path, "video")
+            let res_video = await progressStream(uri)
             if(res_video !== 100) return resolve(res_video)
 
             let result = await encode()
@@ -66,10 +69,10 @@ function download(playlistTitle, data, bin, progressData, author, index) {
         })
     }
 
-    function progressStream(uri, pathage, label) {
+    function progressStreamA(uri, pathage, label) {
         return new Promise(async(resolve) => {
             let res = await downloader(uri, {
-                format: label,
+                format: format === 'mp4' ? 'both' : 'audio',
                 quality: quality,
                 output_path: pathage
             }, (event, data) => {
@@ -94,6 +97,44 @@ function download(playlistTitle, data, bin, progressData, author, index) {
             if(res.status !== 'SUCCESS') return resolve(101)
 
             last_current = last_current + 100
+
+            return resolve(100)
+        })
+    }
+    
+    function progressStream(uri) {
+        return new Promise(async(resolve) => {
+            let res = await multi(uri, {
+                video: dl_video_path,
+                quality: quality,
+                audio: dl_audio_path
+            }, (event, data) => {
+                if(event === 'progress') {
+                    const percent = data[0].percentage
+                    const percent2 = data[1].percentage
+                    const speed = data[0].speed.string
+                    const speed2 = data[1].speed.string
+
+                    const label = data[0].type
+                    const label2 = data[1].type
+
+                    prog.multipleProgress([
+                        String(playlistTitle).green.bold,
+                        ("Downloading \""+dl_title+'"').yellow,
+                        progressData,
+                        { total: 100, current: Math.floor(parseInt(percent)), label, speed },
+                        { total: 100, current: Math.floor(parseInt(percent2)), label: label2, speed: speed2 }
+                    ])
+                } else if(event === 'error') {
+                    prog.log(String(data).red)
+                    return resolve(101)
+                } else if(event === 'finish') {
+                }
+            })
+            
+            if(res.status !== 'SUCCESS') return resolve(101)
+
+            last_current = 200
 
             return resolve(100)
         })

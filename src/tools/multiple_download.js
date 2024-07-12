@@ -1,17 +1,16 @@
 const DL = require('easydl')
 
 const util = require('../utils/tools')
-const info = require('./info')
+const info = require('./info').new
 const cookie = require('./cookie')
 
 module.exports = function(url, data, cb) {
-    let { quality, format, output_path } = data
+    let { quality, video, audio } = data
 
     let id = util.fetchId(util.fetchPlaylistID(url)) === 'video' ? util.fetchPlaylistID(url) : null
-    let infoGet = format === 'both' ? info.old : info.new
 
     return new Promise(async(resolve) => {
-        let got = await infoGet(id)
+        let got = await info(id)
         if(got.status === 'ERROR') return resolve(got)
         
         let all = got.streams || []
@@ -27,47 +26,91 @@ module.exports = function(url, data, cb) {
         all_audio.sort((a, b) => a.bitrate - b.bitrate)
         all_video.sort((a, b) => a.bitrate - b.bitrate)
 
-        let toDl = null
+        let toDlV = filter(all_video, quality)
+        let toDlA = filter(all_audio, quality)
+        
+        let audioProgress = null
+        let videoProgress = null
 
-        if(format === 'audio') {
-            toDl = filter(all_audio, quality)
-        } else if(format === 'video') {
-            toDl = filter(all_video, quality)
-        } else if(format === 'both') {
-            toDl = filter(all_both, quality)
-        } else return resolve({ status: 'ERROR', reason: 'BAD FORMAT' })
+        let audioEnded = false
+        let videoEnded = false
 
-        if(!toDl) return resolve({ status: 'ERROR', reason: 'BAD FORMAT' })
+        if(!toDlV || !toDlA) return resolve({ status: 'ERROR', reason: 'BAD FORMAT' })
 
         try {
-            const dl = new DL(toDl.url, output_path, {
+            const dlV = new DL(toDlV.url, video, {
+                existBehavior: "new_file",
+                httpOptions: cookie.use().requestOptions
+            })
+            const dlA = new DL(toDlA.url, audio, {
                 existBehavior: "new_file",
                 httpOptions: cookie.use().requestOptions
             })
 
-            dl.on('build', () => {
+            dlV.on('build', () => {
+                dlA.start()
+            })
+            dlA.on('build', () => {
                 cb('start')
             })
-            dl.on('progress', ({ total }) => {
-                let data = {
+
+            const checkProgress = () => {
+                if (videoProgress && audioProgress) {
+                    cb('progress', [videoProgress, audioProgress]);
+                    videoProgress = null;
+                    audioProgress = null;
+                }
+            }
+            const checkEnd = () => {
+                if (videoEnded && audioEnded) {
+                    cb('finish', 100);
+                    return resolve({ status: 'SUCCESS' })
+                }
+            }
+
+            dlV.on('progress', ({ total }) => {
+                videoProgress = {
                     speed: {
                         string: convertSpeedToString(total.speed),
                         speed: total.speed
                     },
-                    percentage: total.percentage.toFixed(2)
+                    percentage: total.percentage.toFixed(2),
+                    type: 'video'
+                }
+                
+                checkProgress()
+            })
+            dlA.on('progress', ({ total }) => {
+                audioProgress = {
+                    speed: {
+                        string: convertSpeedToString(total.speed),
+                        speed: total.speed
+                    },
+                    percentage: total.percentage.toFixed(2),
+                    type: 'audio'
                 }
 
-                cb('progress', data)
-            })
-            dl.on('error', (err) => {
-                cb('error', err)
-            })
-            dl.on('end', () => {
-                cb('finish', 100)
-                return resolve({ status: 'SUCCESS' })
+                checkProgress()
             })
 
-            dl.start()
+            dlV.on('error', (err) => {
+                cb('error', err)
+            })
+            dlA.on('error', (err) => {
+                cb('error', err)
+            })
+
+            dlV.on('end', () => {
+                videoEnded = true
+            })
+            dlA.on('end', () => {
+                audioEnded = true
+            })
+
+            setInterval(() => checkProgress())
+            setInterval(() => checkEnd())
+
+            dlV.start()
         } catch (e) {
             cb('error', e)
             return resolve({ status: 'ERROR', reason: 'BAD DOWNLOAD' })

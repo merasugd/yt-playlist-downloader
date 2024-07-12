@@ -11,7 +11,7 @@ module.exports.use = function() {
     let cookie = getCookie()
     let proxy = getProxy()
 
-    let returnData = { requestOptions: {} }
+    let returnData = { requestOptions: {}, agent: null }
 
     if(proxy) {
         returnData.agent = proxy
