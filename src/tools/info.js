@@ -3,11 +3,23 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 
 const cookie = require('./cookie')
 
+function getExtension(mimeType) {
+    const match = mimeType.match(/\/([a-z0-9]+)$/i);
+    return match ? match[1] : null;
+}
+
 function info(vidId) {
     return new Promise(async(resolve) => {
         ytdl(`https://www.youtube.com/watch?v=${vidId}`, cookie.use())
         .then(data => {
-            return resolve({ streams: data.formats, details: data.videoDetails, fullDetails: data, status: 'GOOD' })
+            return resolve({ streams: data.formats.map(v => {
+                let mime = v.mimeType.split(';')[0]
+                let ext = getExtension(mime)
+
+                v.extension = ext
+
+                return v
+            }), details: data.videoDetails, fullDetails: data, status: 'GOOD' })
         })
         .catch(err => {
             return resolve({ status: 'ERROR', reason: err })
@@ -51,7 +63,14 @@ function info2(videoId) {
 
         if(json.playabilityStatus.status !== 'OK') return resolve(json.playabilityStatus)
 
-        return resolve({ streams: json.streamingData.adaptiveFormats, details: json.videoDetails, fullDetails: json, status: 'GOOD' })
+        return resolve({ streams: json.streamingData.adaptiveFormats.map(v => {
+            let mime = v.mimeType.split(';')[0]
+            let ext = getExtension(mime)
+
+            v.extension = ext
+
+            return v
+        }), details: json.videoDetails, fullDetails: json, status: 'GOOD' })
     })
 }
 

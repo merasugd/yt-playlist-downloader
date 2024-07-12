@@ -18,7 +18,7 @@ function download(playlistTitle, data, bin, progressData, author, index) {
     let dl_title = util.sanitizeTitle(title)
     let raw_title = dl_title.replaceAll(' ', '_').toLowerCase()
 
-    let dl_raw_path = path.join(bin, raw_title+".raw."+'mkv')
+    let dl_raw_path = path.join(bin, raw_title+".raw.0000000000000EXTREP000083974374374s")
     let dl_path = path.join(bin, dl_title+'.'+format)
     let dl_final_path = path.join(bin, dl_title+'.'+final_format)
 
@@ -102,9 +102,13 @@ function download(playlistTitle, data, bin, progressData, author, index) {
             let res = await downloader(uri, {
                 format: format === 'mp4' ? 'both' : 'audio',
                 quality: quality,
-                output_path: pathage
+                output_path: pathage.replaceAll('.0000000000000EXTREP000083974374374', '')
             }, (event, data) => {
-                if(event === 'progress') {
+                if(event === 'start') {
+                    let ext = data.extension
+
+                    dl_raw_path = dl_raw_path.replaceAll('.0000000000000EXTREP000083974374374', '.'+ext)
+                } else if(event === 'progress') {
                     const percent = data.percentage
                     const total_progress = label === "video and audio" ? 100 : (format === 'mp3' ? 102 : total)
     

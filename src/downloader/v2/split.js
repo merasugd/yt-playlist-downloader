@@ -22,8 +22,8 @@ function download(playlistTitle, data, bin, progressData, author, index) {
     let dl_title = util.sanitizeTitle(title)
     let raw_title = dl_title.replaceAll(' ', '_').toLowerCase()
 
-    let dl_audio_path = path.join(bin, raw_title+".audio."+'webm')
-    let dl_video_path = path.join(bin, raw_title+".video."+'webm')
+    let dl_audio_path = path.join(bin, raw_title+".audio.0000000000000EXTREP000083974374374")
+    let dl_video_path = path.join(bin, raw_title+".video.0000000000000EXTREP000083974374374")
     let dl_raw_path = path.join(bin, raw_title+".raw."+'mkv')
     let dl_path = path.join(bin, dl_title+'.'+format)
     let dl_final_path = path.join(bin, dl_title+'.'+final_format)
@@ -55,7 +55,7 @@ function download(playlistTitle, data, bin, progressData, author, index) {
             ])
 
             if(format === 'mp3') {
-                let res_audio = await progressStreamA(uri, dl_audio_path, 'audio')
+                let res_audio = await progressStreamA(uri, 'audio')
                 if(res_audio !== 100) return resolve(res_audio)
 
                 return resolve(100)
@@ -69,14 +69,18 @@ function download(playlistTitle, data, bin, progressData, author, index) {
         })
     }
 
-    function progressStreamA(uri, pathage, label) {
+    function progressStreamA(uri, label) {
         return new Promise(async(resolve) => {
             let res = await downloader(uri, {
                 format: format === 'mp4' ? 'both' : 'audio',
                 quality: quality,
-                output_path: pathage
+                output_path: dl_audio_path.replaceAll('.0000000000000EXTREP000083974374374', '')
             }, (event, data) => {
-                if(event === 'progress') {
+                if(event === 'start') {
+                    let ext = data.extension
+
+                    dl_audio_path = dl_audio_path.replaceAll('.0000000000000EXTREP000083974374374', '.'+ext)
+                } else if(event === 'progress') {
                     const percent = data.percentage
                     const total_progress = label === "video and audio" ? 100 : (format === 'mp3' ? 102 : total)
     
@@ -105,11 +109,17 @@ function download(playlistTitle, data, bin, progressData, author, index) {
     function progressStream(uri) {
         return new Promise(async(resolve) => {
             let res = await multi(uri, {
-                video: dl_video_path,
+                video: dl_video_path.replaceAll('.0000000000000EXTREP000083974374374', ''),
                 quality: quality,
-                audio: dl_audio_path
+                audio: dl_audio_path.replaceAll('.0000000000000EXTREP000083974374374', '')
             }, (event, data) => {
-                if(event === 'progress') {
+                if(event === 'start') {
+                    let ext1 = data[0].extension
+                    let ext2 = data[1].extension
+
+                    dl_video_path = dl_video_path.replaceAll('.0000000000000EXTREP000083974374374', '.'+ext1)
+                    dl_audio_path = dl_audio_path.replaceAll('.0000000000000EXTREP000083974374374', '.'+ext2)
+                } else if(event === 'progress') {
                     const percent = data[0].percentage
                     const percent2 = data[1].percentage
                     const speed = data[0].speed.string

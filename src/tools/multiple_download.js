@@ -36,11 +36,11 @@ module.exports = function(url, data, cb) {
         if(!toDlV || !toDlA) return resolve({ status: 'ERROR', reason: 'BAD FORMAT' })
 
         try {
-            const dlV = new DL(toDlV.url, video, {
+            const dlV = new DL(toDlV.url, video+'.'+toDlV.extension, {
                 existBehavior: "new_file",
                 httpOptions: cookie.use().requestOptions
             })
-            const dlA = new DL(toDlA.url, audio, {
+            const dlA = new DL(toDlA.url, audio+'.'+toDlA.extension, {
                 existBehavior: "new_file",
                 httpOptions: cookie.use().requestOptions
             })
@@ -49,7 +49,7 @@ module.exports = function(url, data, cb) {
                 dlA.start()
             })
             dlA.on('build', () => {
-                cb('start')
+                cb('start', [toDlV, toDlA])
             })
 
             const checkProgress = () => {

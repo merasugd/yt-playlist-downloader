@@ -40,13 +40,13 @@ module.exports = function(url, data, cb) {
         if(!toDl) return resolve({ status: 'ERROR', reason: 'BAD FORMAT' })
 
         try {
-            const dl = new DL(toDl.url, output_path, {
+            const dl = new DL(toDl.url, output_path+'.'+toDl.extension, {
                 existBehavior: "new_file",
                 httpOptions: cookie.use().requestOptions
             })
 
             dl.on('build', () => {
-                cb('start')
+                cb('start', toDl)
             })
             dl.on('progress', ({ total }) => {
                 let data = {

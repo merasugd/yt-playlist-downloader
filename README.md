@@ -62,6 +62,7 @@ v1.0.8
 v1.0.9
 - Split V2 Downloaders now downloads both audio and video at the same time.
 - Split V2 uses own info fetcher, while Single V2 uses ytdl-core.
+- Fixes cache downloaded file extensions.
 
 ## Pre-Releases
 v1.0.3-pre
