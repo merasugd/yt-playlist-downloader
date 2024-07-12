@@ -135,7 +135,8 @@ function download(playlistTitle, data, bin, progressData, author, index) {
             if(res.status !== 'SUCCESS') return resolve(101)
 
             last_current = 200
-
+            current = 200
+            
             return resolve(100)
         })
     }

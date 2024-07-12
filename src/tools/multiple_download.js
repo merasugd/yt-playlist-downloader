@@ -18,11 +18,9 @@ module.exports = function(url, data, cb) {
         
         all = all.filter(v => !v.isLive)
         
-        let all_both = all.filter(v => v.mimeType.startsWith('video/') && v.hasAudio && v.hasVideo)
-        let all_video = all.filter(v => v.mimeType.startsWith('video/') && !v.hasAudio)
-        let all_audio = all.filter(v => v.mimeType.startsWith('audio/') && !v.hasVideo)
-
-        all_both.sort((a, b) => (a.bitrate + a.audioBitrate) - (b.bitrate + b.audioBitrate))
+        let all_video = all.filter(v => v.mimeType.startsWith('video/'))
+        let all_audio = all.filter(v => v.mimeType.startsWith('audio/'))
+        
         all_audio.sort((a, b) => a.bitrate - b.bitrate)
         all_video.sort((a, b) => a.bitrate - b.bitrate)
 
