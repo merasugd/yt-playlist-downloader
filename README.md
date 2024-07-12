@@ -59,6 +59,10 @@ v1.0.8
 - No more support for V1 downloaders. More focused on V2 and an upcoming V3 downloader.
 - Added default output dir. (Means you can skip output dir or dont provide any)
 
+v1.0.9
+- Split V2 Downloaders now downloads both audio and video at the same time.
+- Split V2 uses own info fetcher, while Single V2 uses ytdl-core.
+
 ## Pre-Releases
 v1.0.3-pre
 - Removed **Split Download and Merging**
@@ -94,9 +98,6 @@ v1.0.8-pre
 - Added more formats. (m4a/flac/mov/avi)
 - Added list prompt for quality and format.
 - Fixed video specific settings.
-
-v1.0.9
-- Split V2 Downloaders is now downloads both audio and video at the same time.
 
 ## Supported Formats
 #### Audio
