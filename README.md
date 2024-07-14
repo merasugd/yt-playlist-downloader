@@ -21,18 +21,18 @@ older versions can be downloaded thru releases
 ## Installation
 
 - Download the [repository](https://github.com/merasugd/yt-playlist-downloader/archive/refs/heads/main.zip) and extract it
-- Install the required dependencies by running:
+- Install the required dependencies:
   - For Windows, run ```install.bat```
-  - For linux, run ```install.sh```
+  - For Linux, run ```install.sh```
 - To start the program
   - For Windows, run ```start.bat```
-  - For linux, run ```start.sh```
+  - For Linux, run ```start.sh```
     
 ## Features
 
 - **Audio Only Download**: Option to download only the audio from YouTube videos.
-- **Multiple Playlists**: Supports downloading multiple playlists listed in `settings.json`.
-- **YouTube Cookies**: Can use YouTube cookies stored in `settings.json` for downloading restricted content.
+- **Multiple Playlists**: Supports downloading multiple playlists listed in `settings/download.json`.
+- **YouTube Cookies**: Can use your own YouTube cookies stored in `settings/download.json` for downloading restricted content.
 - **Simple Download**: Easy to use for downloading YouTube content.
 - **Compression**: Option to compress downloads into a zip file or move them to a directory.
 - **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.
@@ -171,7 +171,6 @@ v1.0.8-pre
 - Fixed video specific settings.
 
 ## 🔗 Links
-[![youtube](https://img.shields.io/badge/youtube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@merasu_gd)
-
 [![facebook](https://img.shields.io/badge/facebook-0A66C2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=61554338001508)
 
+[![youtube](https://img.shields.io/badge/youtube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@merasu_gd)
