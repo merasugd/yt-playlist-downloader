@@ -81,8 +81,9 @@ module.exports.multipleProgress = (progressList = []) => {
 
         let raw_size = tools.config['centered_logging'] && terminal ? Math.floor((terminal.length) - (total === 100 ? Math.floor(2 + String(current).length) : Math.floor(2 + Math.floor(String(total).length + String(current).length)))) : 40
         let size = speed ? raw_size - 1 - String(speed).length : raw_size
+        let final_size = terminal.length >= 90 ? 100 : size
 
-        const [bar] = createFilledBar(total, current, terminal.length >= 100 ? 100 : size);
+        let [bar] = createFilledBar(total, current, final_size);
 
         return tools.config['centered_logging'] && terminal ? (total === 100 ? speed ? `${bar} ${String(speed)} ${current}%\n${label}` : `${bar} ${current}%\n${label}` : speed ? `${bar} ${String(speed)} ${current}/${total}\n${label}` : `${bar} ${current}/${total}\n${label}`) : `${bar} ${label} ${current}/${total}`
     }).filter(v => v !== 'not-bar')

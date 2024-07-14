@@ -105,7 +105,6 @@ module.exports = function(url, data, cb) {
                 audioEnded = true
             })
 
-            setInterval(() => checkProgress())
             setInterval(() => checkEnd())
 
             dlV.start()

@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const colors = require('colors');
 const ffmpeg = require('ffmpeg-static')
+const terminate = require('terminate')
 
 const cp = require('child_process')
 

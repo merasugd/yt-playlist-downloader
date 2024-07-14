@@ -1,13 +1,18 @@
 const yt = require('yt-search')
+const terminate = require('terminate')
 
 const prog = require('../utils/progress')
 const util = require('../utils/tools')
 
+const animeSearcher = require('../downloader/anime/search')
+
 module.exports = function(playlistId, data) {
     return new Promise(async(resolve) => {
+        if(util.downloader() === 4) return resolve(await animeSearcher(playlistId, data))
+        
         prog.multipleProgress([
             "Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green,
-            ("Searching "+playlistId+'"').yellow
+            ('Searching "'+playlistId+'"').yellow
         ])
 
         let net = await util.checkInternet()

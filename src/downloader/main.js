@@ -15,8 +15,12 @@ const single = require('./v1/single')
 const split_v2 = require('./v2/split')
 const single_v2 = require('./v2/single')
 
+const anime = require('./anime/download')
+
+const terminate = require('terminate')
+
 const download_setting = util.downloader()
-const download = download_setting === 0 ? split : download_setting === 1 ? single : download_setting === 2 ? split_v2 : download_setting === 3 ? single_v2 : null
+const download = download_setting === 0 ? split : download_setting === 1 ? single : download_setting === 2 ? split_v2 : download_setting === 3 ? single_v2 : download_setting === 4 ? anime : null
 
 if(!download) return process.exit(1)
 
@@ -35,7 +39,7 @@ function downloadLooper(arr, bin, pl, aut, id, int) {
             { current, total, label: 'playlist' },
             { total: 100, current: 0, label: 'checking internet'.yellow }
         ])
-        if(!net) return process.exit(1)
+        if(!net) return resolve(101)
 
         prog.multipleProgress([
             String(pl).green.bold,
@@ -78,7 +82,7 @@ module.exports = function(conDl, arr, pl, aut, id, output, move) {
 
         if(result !== 100) {
             prog.log("Failed".red.bold)
-            return process.exit(1)     
+            return process.exit(1)
         }
 
         manager.delete(id)

@@ -5,6 +5,7 @@ const ffmpeg = require('ffmpeg-static')
 const check_net = require('check-internet-connected')
 const request = require('request')
 const url = require('node:url')
+const terminate = require('terminate')
 
 const prog = require('./progress')
 
@@ -13,14 +14,15 @@ const metadata = require('../tools/ffmetadata')
 metadata.setFfmpegPath(ffmpeg)
 
 module.exports.sanitizeTitle = function (title) {
-    return String(title).replaceAll(/[\\/:*"?|<>]/g, '');
+    return String(title).replaceAll(/[\\/:*"?|<>]/g, '').replaceAll('.', '')
 }
 
+module.exports.consumet_options = Object.assign(process.env, { NODE_ENV: 'PROD' })
 module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'config.json'), { encoding: 'utf-8' }))
 module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'download.json'), { encoding: 'utf-8' }))
 
 module.exports.downloader = function(list) {
-    let types = ['split-v1', 'single-v1', 'split-v2', 'single-v2'].map((v, i) => { return { value: v, index: i } })
+    let types = ['split-v1', 'single-v1', 'split-v2', 'single-v2', 'anime-downloader'].map((v, i) => { return { value: v, index: i } })
     let input = module.exports.config['downloader']
 
     if(list) return types.map(v => v.value)
@@ -199,7 +201,7 @@ module.exports.pathCheck = function(input = "", input2) {
     if(!fs.existsSync(downloads) && check) fs.mkdirSync(downloads)
 
     if(check) return downloads
-    if(fs.existsSync(input2) && (fs.statSync(input2).isDirectory())) return input
+    if(fs.existsSync(input2) && (fs.statSync(input2).isDirectory())) return path.resolve(input)
 
     return false
 }
@@ -209,7 +211,7 @@ module.exports.qualityCheck = function(input, list) {
         'highest',
         'medium',
         'lowest'
-    ].filter(v => !module.exports.config['split_download_v2'] && v !== 'medium')
+    ].filter(v => ((module.exports.downloader() === 0 || module.exports.downloader() === 1) && v !== 'medium') || !(module.exports.downloader() === 0 || module.exports.downloader() === 1))
 
     if(list) return quality
 

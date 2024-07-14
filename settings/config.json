@@ -1,5 +1,5 @@
 {
-    "downloader": "split-v2",
+    "downloader": "anime-downloader",
     "safe_download": true,
     "internet_checking": true,
     "centered_logging": true,

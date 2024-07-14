@@ -4,9 +4,74 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.0.9**
+**v1.1.0**
 
 older versions can be downloaded thru releases
+
+## Note
+- When downloading formats other than mp4/mp3. It might contribute to slowness since it converts to mp4/mp3 first before converting to format.
+- The internet check might contribute to slowness. (it depends on your net, you can turn it off in the config).
+- This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
+- The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because one-download quality is sh#t.
+
+## Requires
+- [FFmpeg](https://ffmpeg.org/)
+- [Node.js 20+](https://nodejs.org/en)
+
+## Installation
+
+- Download the [repository](https://github.com/merasugd/yt-playlist-downloader/archive/refs/heads/main.zip) and extract it
+- Install the required dependencies by running:
+  - For Windows, run ```install.bat```
+  - For linux, run ```install.sh```
+- To start the program
+  - For Windows, run ```start.bat```
+  - For linux, run ```start.sh```
+    
+## Features
+
+- **Audio Only Download**: Option to download only the audio from YouTube videos.
+- **Multiple Playlists**: Supports downloading multiple playlists listed in `settings.json`.
+- **YouTube Cookies**: Can use YouTube cookies stored in `settings.json` for downloading restricted content.
+- **Simple Download**: Easy to use for downloading YouTube content.
+- **Compression**: Option to compress downloads into a zip file or move them to a directory.
+- **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.
+- **Multi-Format**: Supports formats like `flac`, `ogg` and more.
+
+## Supported Formats
+#### Audio
+- mp3 (MPEG Audio Layer 3)
+- ogg (Ogg Vorbis)
+- wav (Waveform Audio File Format)
+- m4a (MPEG-4 Audio)
+- flac (Free Lossless Audio Codec)
+#### Video
+- mp4 (MPEG-4 Part 14)
+- mkv (Matroska Video)
+- flv (Flash Video)
+- avi (Audio Video Interleave)
+- mov (QuickTime/MOV)
+
+## Downloaders
+- `split-v1`: Split Downloader V1
+  - It uses purely ytdl-core and splits downloads to audio and video then merges it.
+
+- `single-v1`: Single Downloader V1
+  - It uses purely ytdl-core and downloads videos with attached audio to it. It doesnt need merging but sometimes the quality is sh#t.
+
+- `split-v2`: Split Downloader V2
+  - It uses fetch to gather sources, the difference between split v1 and v2 is v2 uses its own downloader [easydl]() and its incredibly fast.
+
+- `single-v2`
+  - It uses ytdl-core to gather cources, single v2 also uses [easydl](https://www.npmjs.com/package/easydl).
+
+- `anime-downloader`
+  - It uses 3 providers to gather sources, this is a special downloader because it will never get updated again but still be fixed.
+  - It is basically an anime downloader.
+
+## Support
+
+For support, create an issue on GitHub.
 
 ## Releases
 v1.0.1
@@ -64,6 +129,11 @@ v1.0.9
 - Split V2 uses own info fetcher, while Single V2 uses ytdl-core.
 - Fixes cache downloaded file extensions.
 
+v1.1.0
+- Special downloader ('anime-downloader')
+- Added installer script.
+- Rearranged README
+
 ## Pre-Releases
 v1.0.3-pre
 - Removed **Split Download and Merging**
@@ -100,58 +170,8 @@ v1.0.8-pre
 - Added list prompt for quality and format.
 - Fixed video specific settings.
 
-## Supported Formats
-#### Audio
-- mp3 (MPEG Audio Layer 3)
-- ogg (Ogg Vorbis)
-- wav (Waveform Audio File Format)
-- m4a (MPEG-4 Audio)
-- flac (Free Lossless Audio Codec)
-#### Video
-- mp4 (MPEG-4 Part 14)
-- mkv (Matroska Video)
-- flv (Flash Video)
-- avi (Audio Video Interleave)
-- mov (QuickTime/MOV)
-
-## Note
-- When downloading formats other than mp4/mp3. It might contribute to slowness since it converts to mp4/mp3 first before converting to format.
-- The internet check might contribute to slowness. (it depends on your net, you can turn it off in the config).
-- This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
-- The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because one-download quality is sh#t.
-
-## Requires
-- [FFmpeg](https://ffmpeg.org/)
-- [Node.js 20+](https://nodejs.org/en)
-
-## Installation
-
-1. Download the [repository](https://github.com/merasugd/yt-playlist-downloader/archive/refs/heads/main.zip) and extract it
-2. Install the required dependencies by running:
-```bash
-  npm install
-```
-3. To start the program
-
-- For Windows, run ```start.bat```
-- For linux, run ```start.sh```
-    
-## Features
-
-- **Audio Only Download**: Option to download only the audio from YouTube videos.
-- **Multiple Playlists**: Supports downloading multiple playlists listed in `settings.json`.
-- **YouTube Cookies**: Can use YouTube cookies stored in `settings.json` for downloading restricted content.
-- **Simple Download**: Easy to use for downloading YouTube content.
-- **Compression**: Option to compress downloads into a zip file or move them to a directory.
-- **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.
-- **Multi-Format**: Supports formats like `flac`, `ogg` and more.
-
-## Support
-
-For support, create an issue on GitHub.
-
-
 ## 🔗 Links
 [![youtube](https://img.shields.io/badge/youtube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@merasu_gd)
+
 [![facebook](https://img.shields.io/badge/facebook-0A66C2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=61554338001508)
 

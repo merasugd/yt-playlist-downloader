@@ -1,6 +1,8 @@
 const readline = require("readline/promises")
 const fs = require("fs")
 const path = require("path")
+const cp = require('child_process')
+const terminate = require('terminate')
 
 const prompter = readline.createInterface({
     input: process.stdin,
@@ -26,6 +28,14 @@ const downloader = require('./downloader/main')
 ## PLwLSw1_eDZl2v3GdglUbai_QNMJHZMOHP:highest:mp4
 `)
 if(!fs.existsSync(path.join(__dirname, "cookies.txt"))) fs.writeFileSync(path.join(__dirname, "cookies.txt"), '')*/
+
+process.oldKill = process.exit
+process.exit = function(...args) {
+    if(manager.get('pid') && util.downloader() === 4) terminate(manager.get('pid'))
+    manager.set('pid', undefined)
+
+    return process.oldKill(...args)
+}
 
 if(!fs.existsSync(path.join(__dirname, '..', '.cache'))) fs.mkdirSync(path.join(__dirname, '..', '.cache'))
 
@@ -66,7 +76,33 @@ function listPrompt(list = [], title = 'list', str = '') {
     })
 }
 
+function anihost() {
+    return new Promise(async(resolve) => {
+        process.env.NODE_ENV='PROD'
+        const aniwatch = path.join(__dirname, 'special', 'aniwatch-api-main')
+        
+        if(util.downloader() === 4) {
+            let aniServer = cp.exec(`cd ${aniwatch} && npm start`, async(err) => {
+                if(err) {
+                    if(manager.get('pid')) {
+                        terminate(manager.get('pid'))
+                        return resolve(await anihost())
+                    }
+    
+                    console.log(err)
+                    return process.exit(1)
+                }
+            })
+            manager.set('pid', aniServer.pid)
+        }
+
+        return resolve()
+    })
+}
+
 async function start() {
+    await anihost()
+
     let net = await util.checkInternet()
     if(!net) return process.exit(1)
 
@@ -74,7 +110,11 @@ async function start() {
 
     let result = await prompt(false, false, false, false, verCheck.msg)
 
+    if(manager.get('pid') && util.downloader() === 4) terminate(manager.get('pid'))
+    manager.set('pid', undefined)
+
     if(result === 100) return process.exit(0)
+    else return process.exit(1)
 }
 
 function prompt(plId, q, f, t, verMsg) {
@@ -93,6 +133,8 @@ function prompt(plId, q, f, t, verMsg) {
                 manager.reset()
             }
         }
+ 
+        if(util.downloader() === 4) t = 'n'
 
         let inner = String(t || await prompter.question("Multiple Playlist: (y/N) ")).toLowerCase()
         if(util.boolean(inner)) {
@@ -112,8 +154,10 @@ function prompt(plId, q, f, t, verMsg) {
             return resolve(await main(true, false, false, false, in_outputdir, in_move))
         }
 
-        let playlistId = plId || await prompter.question("Playlist: ")
-        if(util.fetchId(util.fetchPlaylistID(playlistId)) === 'unknown') return resolve(await prompt(plId, q, f, 'n', verMsg))
+        let checker = util.downloader() === 4 ? 'Anime Title: ' : "Playlist: "
+        let playlistId = plId || await prompter.question(checker)
+
+        if(util.fetchId(util.fetchPlaylistID(playlistId)) === 'unknown' && util.downloader() !== 4) return resolve(await prompt(plId, q, f, 'n', verMsg))
 
         let quality_list = util.qualityCheck(null, true)
         let quality = String(q || (await listPrompt(quality_list, 'Quality'))).toLowerCase()
@@ -133,7 +177,7 @@ function prompt(plId, q, f, t, verMsg) {
         let makeExceptions = await filters(verMsg, format, quality)
 
         prog.log("Welcome To ".green+"YouTube Playlist Downloader".red+" by MerasGD".green+'\n'+verMsg)
-        let areyousure = String(await prompter.question(`Data:\nPlaylistID: ${(util.fetchPlaylistID(playlistId)).cyan}\nQuality: ${(quality).cyan}\nFormat: ${(format).cyan}\nOutput Dir: ${(outputdir).cyan}\nCompress: ${String(move ? false : true).cyan}\nSettings: ${JSON.stringify(makeExceptions).cyan}\n\nAre you sure with this: (y/N) `))
+        let areyousure = String(await prompter.question(`Data:\n${checker}${(util.fetchPlaylistID(playlistId)).cyan}\nQuality: ${(quality).cyan}\nFormat: ${(format).cyan}\nOutput Dir: ${(outputdir).cyan}\nCompress: ${String(move ? false : true).cyan}\nSettings: ${JSON.stringify(makeExceptions).cyan}\n\nAre you sure with this: (y/N) `))
         if(!util.boolean(areyousure)) {
             return resolve(await prompt(false, false, false, false, verMsg))
         }
@@ -144,7 +188,9 @@ function prompt(plId, q, f, t, verMsg) {
 
 function filters(verMsg, d_format, d_quality) {
     return new Promise(async(resolve) => {
-        let makeOne = await prompter.question('Settings for a video: (y/N) ')
+        let checker = util.downloader() === 4 ? 'an anime episode' : "a video"
+
+        let makeOne = await prompter.question(`Settings for ${checker}: (y/N) `)
         let all = []
 
         if(!util.boolean(makeOne)) {
@@ -154,13 +200,23 @@ function filters(verMsg, d_format, d_quality) {
         function addUp(type) {
             return new Promise(async(resolv) => {
                 let data = {}
-                let tit = `[VideoSetting:${all.length+1}] `
+                let y = util.downloader() === 4 ? 'AnimeSetting' : 'VideoSetting'
+                let tit = `[${y}:${all.length+1}] `
 
                 if(type === 'GIVE_UP') {
                     return resolv(all)
                 }
+ 
+                let toEdit = 'Video'
+                let leType = type
 
-                let id = await prompter.question(tit+`Video ${type}: `)
+                if(util.downloader() === 4) {
+                    type = 'INDEX'
+                    toEdit = 'Anime'
+                    leType = 'Episode'
+                }
+
+                let id = await prompter.question(tit+`${toEdit} ${leType}: `)
                 if(id === 'n' || id === 'no' || id === '' || !id) return resolv(await addUp( (type === 'ID' ? 'TITLE' : (type === 'TITLE' ? 'INDEX' : 'GIVE_UP')) ))
 
                 if(type === 'ID') {
@@ -285,6 +341,7 @@ function main(inner, id, quality, format, outputdir, move, settings, isThereLeft
             } else if(result === 102) {
                 prog.log("Found an invalid format use...".red.bold)
                 return process.exit(1)
+                return process.exit(1)
             } else if(result === 103) {
                 prog.log("Found an invalid quality...".red.bold)
                 return process.exit(1)
@@ -304,6 +361,8 @@ function main(inner, id, quality, format, outputdir, move, settings, isThereLeft
 
         let search_result = isThereLeft ? isThereLeft.data : await searching(id, { quality, format, settings })
 
+        if(!search_result || search_result.error || search_result === 101) return resolve(101)
+
         let playlist_title = search_result.playlist
         let playlist_videos = search_result.videos
         let playlist_author = search_result.author
@@ -317,6 +376,9 @@ function main(inner, id, quality, format, outputdir, move, settings, isThereLeft
         let dl_result = await downloader(isThereLeft, playlist_videos, playlist_title, playlist_author, id, outputdir, move)
 
         await compressor(dl_result, move, outputdir)
+
+        if(manager.get('pid')) terminate(manager.get('pid'))
+        manager.set('pid', undefined)
 
         return resolve(100)
     })

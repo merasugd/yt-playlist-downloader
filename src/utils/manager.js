@@ -23,7 +23,7 @@ module.exports.write = function(data) {
 module.exports.reset = function() {
     if(!tools.config['safe_download']) return {}
 
-    fs.writeFileSync(lock, '{}')
+    fs.writeFileSync(lock, JSON.stringify({ "pid": module.exports.get('pid') || undefined }, null, 4))
 
     return {}
 }
@@ -32,6 +32,20 @@ module.exports.get = function(key) {
     if(!tools.config['safe_download']) return {}
 
     return module.exports.read()[key]
+}
+
+module.exports.set = function(id, val) {
+    if(!tools.config['safe_download']) return {}
+
+    let base = module.exports.read()
+
+    if(base[id]) return base[id]
+
+    base[id] = val
+
+    module.exports.write(base)
+
+    return val
 }
 
 module.exports.save = function(plID, pltitle, arr, out, move, author, lastindex) {
@@ -95,11 +109,11 @@ module.exports.delete = function(plId) {
 module.exports.left = function() {
     if(!tools.config['safe_download']) return false
 
-    let all = Object.keys(module.exports.read())
+    let all = Object.keys(module.exports.read()).filter(v => v !== 'pid')
 
     if(!all || all.length <= 0) return false
 
-    return Object.keys(module.exports.read()).map(v => {
+    return all.map(v => {
         return module.exports.get(v)
     })
 }

@@ -1,12 +1,13 @@
 {
   "name": "yt-playlist-downloader",
-  "version": "1.0.9",
-  "lastrelease": "1.0.9",
+  "version": "1.1.0",
+  "lastrelease": "1.1.0",
   "description": "Download YouTube Playlist",
   "main": "start.js",
   "scripts": {
     "test": "node --inspect src/start.js",
-    "start": "node --no-deprecation src/start.js"
+    "start": "node --no-deprecation src/start.js",
+    "ins": "cd src/special/aniwatch-api-main && npm install && cd ../../.. && npm install"
   },
   "author": "MerasGD",
   "license": "GPL-3.0-only",
@@ -37,5 +38,13 @@
     "uuid": "^10.0.0",
     "yt-search": "^2.11.1",
     "ytdl-core": "^4.11.5"
+  },
+  "dependencies": {
+    "@consumet/extensions": "^1.6.0",
+    "hlsdownloader": "^3.2.6",
+    "m3u8-parser": "^7.1.0",
+    "m3u8stream": "^0.8.6",
+    "node-hls-downloader": "^2.2.0",
+    "terminate": "^2.8.0"
   }
 }

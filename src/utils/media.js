@@ -26,6 +26,8 @@ module.exports.ffmpeg = function(args) {
             return resolve(101)
         })
 
+        //proc.stderr.on('data', (d) => console.log(d.toString()))
+
         proc.on('close', async() => { 
             return resolve(100)
         })
@@ -186,9 +188,9 @@ module.exports.editSongMetadata = function(playlistTitle, track, url, raw_path, 
     })
 }
 
-module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, progressData, url, video_path, nometadata, cover, final_format, final_dl_path, composer) {
+module.exports.editVideoMetadata = function(playlistTitle, ep, video_title, progressData, url, video_path, nometadata, cover, final_format, final_dl_path, composer, met) {
     return new Promise(async(resolve) => {
-        let data = await util.searchYt(url, [
+        let data = met && typeof met === 'object' ? met : await util.searchYt(url, [
             String(playlistTitle).green.bold,
             ("Downloading \""+video_title+'"').yellow,
             progressData,
