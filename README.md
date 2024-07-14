@@ -62,10 +62,10 @@ older versions can be downloaded thru releases
 - `split-v2`: Split Downloader V2
   - It uses fetch to gather sources, the difference between split v1 and v2 is v2 uses its own downloader [easydl]() and its incredibly fast.
 
-- `single-v2`
+- `single-v2`: Single Downloader V2
   - It uses ytdl-core to gather cources, single v2 also uses [easydl](https://www.npmjs.com/package/easydl).
 
-- `anime-downloader`
+- `anime-downloader`: Special Anime Downloader
   - It uses 3 providers to gather sources, this is a special downloader because it will never get updated again but still be fixed.
   - It is basically an anime downloader.
 
