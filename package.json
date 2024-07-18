@@ -7,7 +7,7 @@
   "scripts": {
     "test": "node --inspect src/start.js",
     "start": "node --no-deprecation src/start.js",
-    "ins": "cd src/special/aniwatch-api-main && npm install && cd ../../.. && npm install"
+    "ins": "npm install"
   },
   "author": "MerasGD",
   "license": "GPL-3.0-only",
