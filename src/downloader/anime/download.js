@@ -10,7 +10,7 @@ const download = require('./m3u8')
 
 module.exports = function(playlistTitle, data, bin, progressData, author, index) {
     let sources = data.sources.sources
-    let headers = data.sources.headers || {}
+    let captions = data.captions || []
     let title = util.sanitizeTitle(data.title)
 
     let quality = data.quality
@@ -50,12 +50,12 @@ module.exports = function(playlistTitle, data, bin, progressData, author, index)
 
     function progressStream() {
         return new Promise(async(resolve) => {
-            download(raw_path, quality, sources, headers, (event, data) => {
+            download(raw_path, quality, sources, captions, (event, data) => {
                 if(event === 'error') return resolve(101)
                 if(event === 'end') return resolve(100)
 
                 if(event === 'progress') {
-                    current = Math.floor((data.current / total) * 100)
+                    current = Math.floor((data.current / total).toFixed(2) * 100)
                     data.current = current
 
                     prog.multipleProgress([

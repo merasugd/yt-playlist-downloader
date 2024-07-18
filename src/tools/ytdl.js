@@ -4,6 +4,8 @@ const util = require('../utils/tools')
 const info = require('./info')
 const cookie = require('./cookie')
 
+let concurrent = util.settings.thread || 10
+
 module.exports = function(url, data, cb) {
     let { quality, format, output_path } = data
 
@@ -42,7 +44,8 @@ module.exports = function(url, data, cb) {
         try {
             const dl = new DL(toDl.url, output_path+'.'+toDl.extension, {
                 existBehavior: "new_file",
-                httpOptions: cookie.use().requestOptions
+                httpOptions: cookie.use().requestOptions,
+                connections: concurrent
             })
 
             dl.on('build', () => {

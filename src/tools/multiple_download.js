@@ -4,6 +4,8 @@ const util = require('../utils/tools')
 const info = require('./info').new
 const cookie = require('./cookie')
 
+let concurrent = util.settings.thread || 10
+
 module.exports = function(url, data, cb) {
     let { quality, video, audio } = data
 
@@ -38,11 +40,13 @@ module.exports = function(url, data, cb) {
         try {
             const dlV = new DL(toDlV.url, video+'.'+toDlV.extension, {
                 existBehavior: "new_file",
-                httpOptions: cookie.use().requestOptions
+                httpOptions: cookie.use().requestOptions,
+                connections: concurrent
             })
             const dlA = new DL(toDlA.url, audio+'.'+toDlA.extension, {
                 existBehavior: "new_file",
-                httpOptions: cookie.use().requestOptions
+                httpOptions: cookie.use().requestOptions,
+                connections: concurrent
             })
 
             dlV.on('build', () => {

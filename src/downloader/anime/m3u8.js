@@ -2,9 +2,10 @@ const { URL } = require('node:url')
 const { default: ffmpegPath } = require('ffmpeg-static')
 const fs = require('fs')
 const path = require('path')
-const cp = require('child_process')
+const fsp = require('fs/promises')
 const m3u8Parser = require('m3u8-parser')
 const hls = require('node-hls-downloader')
+const m3u8 = require('node-m3u8-downloader')
 
 const parser = new m3u8Parser.Parser()
  
@@ -25,11 +26,63 @@ function hlshandle(output, quality, sources, source_headers, cb, t) {
         }
 
         try {
-            let type = t || fetched.type
+            let type = t
             let stream = fetched.url
-            let concurrent = 10
+            let concurrent = util.settings.threads || 20
 
-            if(type === 'retry') {
+            if(!type) {
+                let instance = new m3u8({
+                    streamUrl: stream,
+                    cache: segments,
+                    outputFile: output,
+                    quality: quality || 'highest',
+                    mergedPath: path.join(segments, 'merged.ts'),
+                    concurrency: 10,
+                    ffmpegPath: ffmpegPath,
+                    cb: function(){}
+                })
+
+                if(Array.isArray(source_headers) && source_headers.length > 0) {
+                    source_headers.forEach(v => {
+                        if(!v || typeof v !== 'object') return
+
+                        let uri = v.uri || v.url
+                        let lang = v.lang
+
+                        if(!uri || !lang) return
+
+                        instance.addCaption(uri, lang)
+                    })
+                }
+
+                instance.startDownload()
+
+                instance.on('start', () => {
+                    cb('start')
+                })
+                instance.on('paring', () => {
+                    cb('progress', { total: 100, current: 0, label: 'parsing m3u8' })
+                })
+                instance.on('merging:start', () => {
+                    cb('progress', { total: 100, current: 100, label: 'merging streams'})
+                })
+                instance.on('end', async() => {
+                    if(fs.existsSync(segments)) await fsp.rm(segments, { recursive: true, force: true })
+                    
+                    cb('end')
+                    return resolve(100)
+                })
+                instance.on('segments_download:progress', (progressData) => {
+                    cb('progress', {
+                        total: 100,
+                        current: progressData.progress.percentage,
+                        label: 'downloading ts segments'
+                    })
+                })
+                instance.on('error', async() => {
+                    return resolve(await hlshandle(output, quality, sources, source_headers, cb, 'hls'))
+                })
+            } else if(type === 'retry') {
                 cb('start')
 
                 if(fs.existsSync(segments)) await require('fs/promises').rm(segments, { recursive: true, force: true })
@@ -86,7 +139,7 @@ function hlshandle(output, quality, sources, source_headers, cb, t) {
                         if(String(log).includes('Received')) {
                             current = current + 1
 
-                            let label = Math.floor((current / total) * 100) === 100 || current === total ? 'merging streams' : 'downloading hls'
+                            let label = Math.floor((current / total) * 100) === 100 || current === total ? 'merging streams' : 'streaming hls'
 
                             cb('progress', { total: 100, current: Math.floor((current / total) * 100), label })
                         }
@@ -119,7 +172,7 @@ function hlshandle(output, quality, sources, source_headers, cb, t) {
                         order.push(data.path)
 
                         let percentage = Math.floor((current / total) * 100)
-                        let label = percentage === 100 || current === total ? 'merging streams' : 'downloading m3u8'
+                        let label = percentage === 100 || current === total ? 'merging streams' : 'streaming m3u8'
 
                         return cb('progress', { total: 100, current: percentage, label })
                     }

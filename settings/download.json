@@ -8,6 +8,7 @@
             "secret": ""
         }
     },
+    "threads": 10,
     "playlists": [
         {
             "playlistId": "PLs5tceiYBACxtsWYb3fQTYSQHEmFl3aTX",

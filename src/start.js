@@ -29,14 +29,6 @@ const downloader = require('./downloader/main')
 `)
 if(!fs.existsSync(path.join(__dirname, "cookies.txt"))) fs.writeFileSync(path.join(__dirname, "cookies.txt"), '')*/
 
-process.oldKill = process.exit
-process.exit = function(...args) {
-    if(manager.get('pid') && util.downloader() === 4) terminate(manager.get('pid'))
-    manager.set('pid', undefined)
-
-    return process.oldKill(...args)
-}
-
 if(!fs.existsSync(path.join(__dirname, '..', '.cache'))) fs.mkdirSync(path.join(__dirname, '..', '.cache'))
 
 fs.readdirSync(path.join(__dirname, '..', '.cache')).filter(v => v.startsWith('temp-')).map(v => { return path.join(__dirname, '..', '.cache', v) }).forEach(l => { return fs.rmSync(l, { force: true })} )
@@ -76,33 +68,7 @@ function listPrompt(list = [], title = 'list', str = '') {
     })
 }
 
-function anihost() {
-    return new Promise(async(resolve) => {
-        process.env.NODE_ENV='PROD'
-        const aniwatch = path.join(__dirname, 'special', 'aniwatch-api-main')
-        
-        if(util.downloader() === 4) {
-            let aniServer = cp.exec(`cd ${aniwatch} && npm start`, async(err) => {
-                if(err) {
-                    if(manager.get('pid')) {
-                        terminate(manager.get('pid'))
-                        return resolve(await anihost())
-                    }
-    
-                    console.log(err)
-                    return process.exit(1)
-                }
-            })
-            manager.set('pid', aniServer.pid)
-        }
-
-        return resolve()
-    })
-}
-
 async function start() {
-    await anihost()
-
     let net = await util.checkInternet()
     if(!net) return process.exit(1)
 

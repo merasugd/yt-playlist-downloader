@@ -6,6 +6,7 @@ const check_net = require('check-internet-connected')
 const request = require('request')
 const url = require('node:url')
 const terminate = require('terminate')
+const axios = require('axios')
 
 const prog = require('./progress')
 
@@ -310,13 +311,31 @@ module.exports.searchYt = function(uri, d) {
 }
 
 module.exports.basicDL = function(uri, out) {
-    return new Promise(resolve => {
+    return new Promise(async(resolve) => {
+        let response = await axios({
+            method: 'GET',
+            url: uri,
+            responseType: 'stream'
+        })
+
+        if(!response.data) return resolve(101)
+
+        response.data.pipe(fs.createWriteStream(out))
+
+        response.data.on('end', () => resolve(100))
+        response.data.on('error', async() => resolve(await secondDl(uri, out)))
+    })
+}
+
+function secondDl(uri, out) {
+    return new Promise(async(resolve) => {
         let stream = fs.createWriteStream(out)
 
-        request(uri).pipe(stream)
+        request(uri)
+        .pipe(stream)
 
-        stream.on('finish', () => { resolve(100) })
-        stream.on('error', () => { resolve(101) })
+        stream.on('error', () => resolve(101))
+        stream.on('finish', () => resolve(100))
     })
 }
 

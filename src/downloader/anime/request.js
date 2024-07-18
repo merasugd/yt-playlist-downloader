@@ -6,8 +6,7 @@ function request(query, host = 'Gogo Anime') {
 
     return new Promise(async(resolve) => {
         if(host === 'Gogo Anime') anime = new ANIME.Gogoanime()
-        else if(host === 'Zoro') anime = new ANIME.Zoro()
-        else return resolve(await ani(query))
+        else return resolve(101)
 
         try {
             let searched = await anime.search(query)
@@ -58,7 +57,7 @@ function request(query, host = 'Gogo Anime') {
 
             return resolve(returnData)
         } catch (err) { 
-            return await res()
+            return resolve(101)
         }
 
         async function res() {
@@ -123,11 +122,22 @@ function ani(q) {
                     if(!source.sources) return resol({ "404": true })
                     if(!Array.isArray(source.sources) || source.sources.length <= 0) return resol({ "404": true })
 
+                    if(source.tracks && Array.isArray(source.tracks) && source.tracks.length > 0) {
+                        let captions = source.tracks.filter(v => v && typeof v === 'object').filter(v => v.kind && String(v.kind).toLowerCase().includes('captions'))
+
+                        v.captions = captions.map(v => {
+                            return {
+                                uri: v.file,
+                                lang: String(v.label || 'english').toLowerCase()
+                            }
+                        })
+                    }
+
                     v.sources = {
                         sources: source.sources,
                         headers: source.headers || {}
                     }
-                            
+
                     return resol(v)
                 })
             })
