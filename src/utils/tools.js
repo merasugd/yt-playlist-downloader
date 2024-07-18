@@ -320,9 +320,10 @@ module.exports.basicDL = function(uri, out) {
 
         if(!response.data) return resolve(101)
 
-        response.data.pipe(fs.createWriteStream(out))
-
-        response.data.on('end', () => resolve(100))
+        let outStr = fs.createWriteStream(out)
+        
+        response.data.pipe(outStr)
+        outStr.on('finish', () => resolve(100))
         response.data.on('error', async() => resolve(await secondDl(uri, out)))
     })
 }
