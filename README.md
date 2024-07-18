@@ -1,5 +1,5 @@
 
-# YouTube Playlist Downloader
+<h1 align="center">YouTube Playlist Downloader</h1>
 
 A simple program to download YouTube playlists.
 
