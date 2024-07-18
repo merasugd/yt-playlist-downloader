@@ -65,7 +65,7 @@ older versions can be downloaded thru releases
   - It uses ytdl-core to gather cources, single v2 also uses [easydl](https://www.npmjs.com/package/easydl).
 
 - `anime-downloader`: Special Anime Downloader
-  - It uses 3 providers to gather sources, this is a special downloader because it will never get updated again but still be fixed.
+  - It uses a provider to gather sources, this is a special downloader because it will never get updated again but still be fixed.
   - It is basically an anime downloader.
 
 ## Support
@@ -170,7 +170,7 @@ v1.0.8-pre
 - Fixed video specific settings.
 
 v1.1.1-pre
-- Removed aniwatch provider
+- Removed 2 providers
 - Better m3u8 downloader
 - Fixed bugs
 
