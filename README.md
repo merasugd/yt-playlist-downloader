@@ -170,7 +170,7 @@ v1.0.8-pre
 - Fixed video specific settings.
 
 v1.1.1-pre
-- Removed 2 providers
+- Removed 2 anime providers
 - Better m3u8 downloader
 - Fixed bugs
 
