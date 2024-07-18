@@ -45,7 +45,7 @@
     "m3u8-parser": "^7.1.0",
     "m3u8stream": "^0.8.6",
     "node-hls-downloader": "^2.2.0",
-    "node-m3u8-downloader": "^1.0.5",
+    "node-m3u8-downloader": "^1.0.7",
     "terminate": "^2.8.0"
   }
 }
