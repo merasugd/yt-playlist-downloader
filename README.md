@@ -178,3 +178,5 @@ v1.1.1-pre
 [![facebook](https://img.shields.io/badge/facebook-0A66C2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=61554338001508)
 
 [![youtube](https://img.shields.io/badge/youtube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@merasu_gd)
+
+[![stats](https://github-readme-stats-git-masterrstaa-rickstaa.vercel.app/api?username=merasugd&theme=dark)]
