@@ -4,15 +4,14 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.1.1-pre**
+**v1.1.0**
 
 older versions can be downloaded thru releases
 
 ## Note
-- When downloading formats other than mp4/mp3. It might contribute to slowness since it converts to mp4/mp3 first before converting to format.
 - The internet check might contribute to slowness. (it depends on your net, you can turn it off in the config).
 - This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
-- The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because one-download quality is sh#t.
+- The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because single-download quality is sh#t.
 
 ## Requires
 - [FFmpeg](https://ffmpeg.org/)
@@ -21,18 +20,18 @@ older versions can be downloaded thru releases
 ## Installation
 
 - Download the [repository](https://github.com/merasugd/yt-playlist-downloader/archive/refs/heads/main.zip) and extract it
-- Install the required dependencies by running:
+- Install the required dependencies:
   - For Windows, run ```install.bat```
-  - For linux, run ```install.sh```
+  - For Linux, run ```install.sh```
 - To start the program
   - For Windows, run ```start.bat```
-  - For linux, run ```start.sh```
+  - For Linux, run ```start.sh```
     
 ## Features
 
 - **Audio Only Download**: Option to download only the audio from YouTube videos.
-- **Multiple Playlists**: Supports downloading multiple playlists listed in `settings.json`.
-- **YouTube Cookies**: Can use YouTube cookies stored in `settings.json` for downloading restricted content.
+- **Multiple Playlists**: Supports downloading multiple playlists listed in `settings/download.json`.
+- **YouTube Cookies**: Can use your own YouTube cookies stored in `settings/download.json` for downloading restricted content.
 - **Simple Download**: Easy to use for downloading YouTube content.
 - **Compression**: Option to compress downloads into a zip file or move them to a directory.
 - **Split Download and Merging**: Downloads audio and video separately and merges them into a single file using `ffmpeg`.
@@ -62,10 +61,10 @@ older versions can be downloaded thru releases
 - `split-v2`: Split Downloader V2
   - It uses fetch to gather sources, the difference between split v1 and v2 is v2 uses its own downloader [easydl]() and its incredibly fast.
 
-- `single-v2`
+- `single-v2`: Single Downloader V2
   - It uses ytdl-core to gather cources, single v2 also uses [easydl](https://www.npmjs.com/package/easydl).
 
-- `anime-downloader`
+- `anime-downloader`: Special Anime Downloader
   - It uses 3 providers to gather sources, this is a special downloader because it will never get updated again but still be fixed.
   - It is basically an anime downloader.
 
@@ -170,11 +169,7 @@ v1.0.8-pre
 - Added list prompt for quality and format.
 - Fixed video specific settings.
 
-v1.1.1-pre
-- Removed 2 useless providers as it costs ram.
-
 ## 🔗 Links
-[![youtube](https://img.shields.io/badge/youtube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@merasu_gd)
 [![facebook](https://img.shields.io/badge/facebook-0A66C2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=61554338001508)
 
-[![github](https://github-readme-stats-git-masterrstaa-rickstaa.vercel.app/api?username=merasugd&theme=dark)]
+[![youtube](https://img.shields.io/badge/youtube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@merasu_gd)
