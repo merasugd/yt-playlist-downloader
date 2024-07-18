@@ -4,7 +4,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.1.0**
+**v1.1.1-pre**
 
 older versions can be downloaded thru releases
 
@@ -168,6 +168,11 @@ v1.0.8-pre
 - Added more formats. (m4a/flac/mov/avi)
 - Added list prompt for quality and format.
 - Fixed video specific settings.
+
+v1.1.1-pre
+- Removed aniwatch provider
+- Better m3u8 downloader
+- Fixed bugs
 
 ## 🔗 Links
 [![facebook](https://img.shields.io/badge/facebook-0A66C2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=61554338001508)
