@@ -179,7 +179,7 @@ v1.1.1-pre
 v1.1.1-pre2
 - Brings back the 2 anime providers.
 - Fixed captions (anime only)
-- Added anime apis settings on the `settings folder` so you use your own.
+- Added anime apis settings(`api.js`) on the `settings folder` so you use your own.
 
 ## 🔗 Links
 [![facebook](https://img.shields.io/badge/facebook-0A66C2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=61554338001508)
