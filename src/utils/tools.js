@@ -21,7 +21,7 @@ module.exports.sanitizeTitle = function (title) {
 module.exports.consumet_options = Object.assign(process.env, { NODE_ENV: 'PROD' })
 module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'config.json'), { encoding: 'utf-8' }))
 module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'download.json'), { encoding: 'utf-8' }))
-
+module.exports.settings.threads = module.exports.settings.threads || module.exports.settings.download_threads || module.exports.settings.concurrency || 15
 module.exports.downloader = function(list) {
     let types = ['split-v1', 'single-v1', 'split-v2', 'single-v2', 'anime-downloader'].map((v, i) => { return { value: v, index: i } })
     let input = module.exports.config['downloader']

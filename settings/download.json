@@ -8,7 +8,7 @@
             "secret": ""
         }
     },
-    "threads": 10,
+    "download_threads": 10,
     "playlists": [
         {
             "playlistId": "PLs5tceiYBACxtsWYb3fQTYSQHEmFl3aTX",

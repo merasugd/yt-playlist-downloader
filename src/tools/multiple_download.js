@@ -4,7 +4,7 @@ const util = require('../utils/tools')
 const info = require('./info').new
 const cookie = require('./cookie')
 
-let concurrent = util.settings.thread || 10
+let concurrent = util.settings.threads || 10
 
 module.exports = function(url, data, cb) {
     let { quality, video, audio } = data
