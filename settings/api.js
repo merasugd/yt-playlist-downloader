@@ -1,5 +1,5 @@
 module.exports = {
-    // you can host your own and just use that instead of these free apis
+    // you can host your own and just use that instead of these free apis I provided.
     // api consumet github https://github.com/consumet/api.consumet.org (hosting guide in their github)
     consumet_apis: [
         'https://zerotenki.vercel.app/',
@@ -7,7 +7,7 @@ module.exports = {
         'https://consumet2.vercel.app/'
     ],
 
-    // you can host your own and just use that instead of these free apis
+    // you can host your own and just use that instead of these free apis I provided.
     // aniwatch api github https://github.com/ghoshRitesh12/aniwatch-api (hosting guide in their github)
     aniwatch_apis: [
         'https://hianime-api-beige.vercel.app/',
