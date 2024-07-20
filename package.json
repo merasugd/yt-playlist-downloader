@@ -1,6 +1,6 @@
 {
   "name": "yt-playlist-downloader",
-  "version": "1.1.1-pre",
+  "version": "1.1.1-pre2",
   "lastrelease": "1.1.0",
   "description": "Download YouTube Playlist",
   "main": "start.js",
@@ -42,10 +42,11 @@
   "dependencies": {
     "@consumet/extensions": "^1.6.0",
     "hlsdownloader": "^3.2.6",
+    "iso-639-2": "^3.0.2",
     "m3u8-parser": "^7.1.0",
     "m3u8stream": "^0.8.6",
     "node-hls-downloader": "^2.2.0",
-    "node-m3u8-downloader": "^1.1.0",
+    "node-m3u8-downloader": "^1.1.1",
     "terminate": "^2.8.0"
   }
 }

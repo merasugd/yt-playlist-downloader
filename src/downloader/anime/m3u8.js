@@ -37,8 +37,9 @@ function hlshandle(output, quality, sources, source_headers, cb, t) {
                     outputFile: output,
                     quality: quality || 'highest',
                     mergedPath: path.join(segments, 'merged.ts'),
-                    concurrency: 10,
+                    concurrency: concurrent,
                     ffmpegPath: ffmpegPath,
+                    useFfmpegToMerge: true,
                     cb: function(){}
                 })
 
@@ -67,7 +68,7 @@ function hlshandle(output, quality, sources, source_headers, cb, t) {
                     cb('progress', { total: 100, current: 100, label: 'merging streams'})
                 })
                 instance.on('end', async() => {
-                    if(fs.existsSync(segments)) await fsp.rm(segments, { recursive: true, force: true })
+                    //if(fs.existsSync(segments)) await fsp.rm(segments, { recursive: true, force: true })
                     
                     cb('end')
                     return resolve(100)

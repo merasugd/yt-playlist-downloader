@@ -1,14 +1,16 @@
 
 <h1 align="center">YouTube Playlist Downloader</h1>
 
+## About
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.1.1-pre**
+**v1.1.1-pre2**
 
 older versions can be downloaded thru releases
 
 ## Note
+- The subtitles for anime are soft subtitles means you can turn on or off or change the subtitle depending on the available captions given by the anime. The real note is, some video players cant seem to see/parse the subtitles but as of tested, the subtitle supports VLC Media Player or more I dunno. Tho some downloaded anime might have the hard subtitles or the subtitle is put on the video.
 - The internet check might contribute to slowness. (it depends on your net, you can turn it off in the config).
 - This program may be slow because it merges the audio and video downloads using `ffmpeg` and it also converts downloads to their specified format and edits the metadata of downloads using `ffmpeg`.
 - The program can split downloads as an option on the config due to 'encoding errors,' videos without sound, unplayable videos, or because single-download quality is sh#t.
@@ -173,6 +175,11 @@ v1.1.1-pre
 - Removed 2 anime providers
 - Better m3u8 downloader
 - Fixed bugs
+
+v1.1.1-pre2
+- Brings back the 2 anime providers.
+- Fixed captions (anime only)
+- Added anime apis settings on the `settings folder` so you can host or/and use your own.
 
 ## 🔗 Links
 [![facebook](https://img.shields.io/badge/facebook-0A66C2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=61554338001508)
