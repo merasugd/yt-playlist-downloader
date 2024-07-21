@@ -316,34 +316,63 @@ module.exports.searchYt = function(uri, d) {
     })
 }
 
-module.exports.basicDL = function(uri, out) {
-    return new Promise(async(resolve) => {
-        let response = await axios({
-            method: 'GET',
-            url: uri,
-            responseType: 'stream'
-        })
+module.exports.basicDL = dl
+function dl(uri, out, retries = 3, backoff = 1000) {
+    return new Promise(async (resolve) => {
+        try {
+            if(fs.existsSync(out)) await fsp.rm(out, { recursive: true, force: true });
 
-        if(!response.data) return resolve(101)
+            let response = await axios({
+                method: 'GET',
+                url: uri,
+                responseType: 'stream',
+                timeout: 10000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+                }
+            });
 
-        let outStr = fs.createWriteStream(out)
-        
-        response.data.pipe(outStr)
-        outStr.on('finish', () => resolve(100))
-        response.data.on('error', async() => resolve(await secondDl(uri, out)))
-    })
+            if (!response.data) return resolve(await secondDl(uri, out, retries, backoff));
+
+            let outStr = fs.createWriteStream(out);
+
+            response.data.pipe(outStr);
+
+            outStr.on('finish', async () => resolve(100));
+            response.data.on('error', async () => resolve(await secondDl(uri, out, retries, backoff)));
+        } catch (e) {
+            if (retries > 0) {
+                await new Promise(res => setTimeout(res, backoff));
+                return resolve(await dl(uri, out, retries - 1, backoff * 2));
+            }
+            resolve(await secondDl(uri, out, retries, backoff));
+        }
+    });
 }
 
-function secondDl(uri, out) {
-    return new Promise(async(resolve) => {
-        let stream = fs.createWriteStream(out)
+function secondDl(uri, out, retries = 3, backoff = 1000) {
+    return new Promise(async (resolve) => {
+        if(fs.existsSync(out)) await fsp.rm(out, { recursive: true, force: true });
 
-        request(uri)
-        .pipe(stream)
+        let stream = fs.createWriteStream(out);
 
-        stream.on('error', () => resolve(101))
-        stream.on('finish', () => resolve(100))
-    })
+        request(uri, {
+            timeout: 10000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+            }
+        })
+        .pipe(stream);
+
+        stream.on('error', async (err) => {
+            if (retries > 0) {
+                await new Promise(res => setTimeout(res, backoff));
+                return resolve(await secondDl(uri, out, retries - 1, backoff * 2));
+            }
+            resolve(101);
+        });
+        stream.on('finish', () => resolve(100));
+    });
 }
 
 module.exports.boolean = function(bool) {
