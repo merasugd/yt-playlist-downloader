@@ -1,5 +1,6 @@
-const ytdl = require('ytdl-core').getInfo
+const ytdl = require('@distube/ytdl-core').getInfo
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const undici = (...args) => import('undici').then((undici) => undici.fetch(...args));
 
 const cookie = require('./cookie')
 
@@ -21,8 +22,8 @@ function info(vidId) {
                 return v
             }), details: data.videoDetails, fullDetails: data, status: 'GOOD' })
         })
-        .catch(err => {
-            return resolve({ status: 'ERROR', reason: err })
+        .catch(async(err) => {
+            return resolve(await info2(vidId))
         })
     })
 }
@@ -56,7 +57,7 @@ function info2(videoId) {
             racyCheckOk: true
         }
           
-        const res = await fetch(`https://www.youtube.com/youtubei/v1/player?key${apiKey}&prettyPrint=false`, Object.assign({ agent: cookie.use().agent }, cookie.use().requestOptions, { method: 'POST', body: JSON.stringify(b), headers }));
+        const res = await undici(`https://www.youtube.com/youtubei/v1/player?key${apiKey}&prettyPrint=false`, Object.assign(cookie.use().agent, { method: 'POST', body: JSON.stringify(b), headers }));
             
         if(!res.ok) return resolve({ status: res.status, reason: res.statusText })
         const json = await res.json();
@@ -74,4 +75,4 @@ function info2(videoId) {
     })
 }
 
-module.exports = { new: info2, old: info }
+module.exports = { new: info, old: info }

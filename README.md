@@ -5,7 +5,7 @@
 A simple program to download YouTube playlists.
 
 ## Current Version
-**v1.1.1-pre2**
+**v1.1.1-pre3**
 
 older versions can be downloaded thru releases
 
@@ -180,6 +180,11 @@ v1.1.1-pre2
 - Brings back the 2 anime providers.
 - Fixed captions (anime only)
 - Added anime apis settings(`api.js`) on the `settings folder` so you use your own.
+
+v1.1.1-pre2
+- Switched from ytdl-core to @distube/ytdl-core
+- Split V2 uses ytdl once again to gather sources
+- Cookie JSON is now stored in `settings/cookie.json`, you can get youtube cookies using [EditThisCookie](http://www.editthiscookie.com/), export and paste it in `settings/cookie.json`.
 
 ## 🔗 Links
 [![facebook](https://img.shields.io/badge/facebook-0A66C2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=61554338001508)

@@ -11,6 +11,8 @@ const axios = require('axios')
 const prog = require('./progress')
 
 const metadata = require('../tools/ffmetadata')
+const cookies = path.join(__dirname, '..', '..', 'settings', 'cookie.json')
+const default_cookies = path.join(__dirname, '..', '..', '.cache', '_default_cookie.txt')
 
 metadata.setFfmpegPath(ffmpeg)
 
@@ -21,6 +23,10 @@ module.exports.sanitizeTitle = function (title) {
 module.exports.consumet_options = Object.assign(process.env, { NODE_ENV: 'PROD' })
 module.exports.config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'config.json'), { encoding: 'utf-8' }))
 module.exports.settings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'settings', 'download.json'), { encoding: 'utf-8' }))
+module.exports.cookies = fs.existsSync(cookies) && fs.readFileSync(cookies, { encoding: 'utf-8' }) !== '' && !fs.readFileSync(cookies, { encoding: 'utf-8' }).startsWith(' ') && fs.readFileSync(cookies, { encoding: 'utf-8' }).startsWith('[')
+                         ? JSON.parse(fs.readFileSync(cookies, { encoding: 'utf-8' }))
+                         : fs.existsSync(default_cookies) ? JSON.parse(Buffer.from(fs.readFileSync(default_cookies, { encoding: 'utf-8' }).split('\n')[0], 'base64').toString('utf-8')) : undefined
+
 module.exports.settings.threads = module.exports.settings.threads || module.exports.settings.download_threads || module.exports.settings.concurrency || 15
 module.exports.downloader = function(list) {
     let types = ['split-v1', 'single-v1', 'split-v2', 'single-v2', 'anime-downloader'].map((v, i) => { return { value: v, index: i } })

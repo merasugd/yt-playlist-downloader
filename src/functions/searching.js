@@ -21,16 +21,21 @@ module.exports = function(playlistId, data) {
         playlistId = util.fetchPlaylistID(playlistId)
 
         let opt_pl = { listId: playlistId }
-        let opt_vd = playlistId
+        let opt_vd = { videoId: playlistId }
         let typeGot = util.fetchId(playlistId)
         let opt = typeGot === 'video' ? opt_vd : opt_pl
+        let list = null
 
-        let list = await yt(opt)
+        try {
+            list = await yt(opt)
+        } catch(e) {
+            return resolve(101)
+        }
         
         data = data || {}
 
         if(typeGot === 'video') {
-            let firstVid = list.videos[0]
+            let firstVid = list
 
             list.title = firstVid.title
             list.videos = [ firstVid ]

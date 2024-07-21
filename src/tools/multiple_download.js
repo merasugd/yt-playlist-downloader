@@ -39,14 +39,10 @@ module.exports = function(url, data, cb) {
 
         try {
             const dlV = new DL(toDlV.url, video+'.'+toDlV.extension, {
-                existBehavior: "new_file",
-                httpOptions: cookie.use().requestOptions,
-                connections: concurrent
+                existBehavior: "new_file"
             })
             const dlA = new DL(toDlA.url, audio+'.'+toDlA.extension, {
-                existBehavior: "new_file",
-                httpOptions: cookie.use().requestOptions,
-                connections: concurrent
+                existBehavior: "new_file"
             })
 
             dlV.on('build', () => {

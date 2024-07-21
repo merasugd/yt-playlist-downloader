@@ -43,9 +43,7 @@ module.exports = function(url, data, cb) {
 
         try {
             const dl = new DL(toDl.url, output_path+'.'+toDl.extension, {
-                existBehavior: "new_file",
-                httpOptions: cookie.use().requestOptions,
-                connections: concurrent
+                existBehavior: "new_file"
             })
 
             dl.on('build', () => {
