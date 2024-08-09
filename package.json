@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@consumet/extensions": "^1.6.0",
-    "@distube/ytdl-core": "^4.13.5",
+    "@distube/ytdl-core": "^4.14.4",
     "hlsdownloader": "^3.2.6",
     "iso-639-2": "^3.0.2",
     "m3u8-parser": "^7.1.0",
