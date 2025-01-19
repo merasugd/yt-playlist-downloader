@@ -1,3 +1,4 @@
+⚠️ **Important Notice**: This program is no longer maintained, as it is being rewritten in TypeScript for improved performance and features. If you are interested in the upcoming version, please stay tuned.
 
 <h1 align="center">YouTube Playlist Downloader</h1>
 
